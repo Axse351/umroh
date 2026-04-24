@@ -2,63 +2,78 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pemasukan;
 use Illuminate\Http\Request;
 
-class PemasukanController extends Controller
+class PemasukkanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $kategori = $request->kategori;
+        $bulan    = $request->bulan;
+        $tahun    = $request->tahun ?? now()->year;
+
+        $pemasukans = Pemasukan::with('karyawan')
+            ->when($kategori, fn($q) => $q->where('kategori', $kategori))
+            ->when($bulan,    fn($q) => $q->whereMonth('tanggal', $bulan))
+            ->whereYear('tanggal', $tahun)
+            ->latest()->paginate(10);
+
+        $total = $pemasukans->sum('jumlah');
+
+        return view('pemasukan.index', compact('pemasukans', 'total', 'kategori', 'bulan', 'tahun'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('pemasukan.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'sumber'     => 'required|string|max:255',
+            'kategori'   => 'required|in:pembayaran_jamaah,setoran_tabungan,transaksi_layanan,komisi,lainnya',
+            'jumlah'     => 'required|numeric|min:1',
+            'tanggal'    => 'required|date',
+            'keterangan' => 'nullable|string',
+        ]);
+
+        $data = $request->all();
+        $data['no_pemasukan'] = 'PMS-' . strtoupper(uniqid());
+        $data['karyawan_id']  = auth()->user()->karyawan->id ?? null;
+
+        Pemasukan::create($data);
+        return redirect()->route('pemasukan.index')->with('success', 'Data pemasukan berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Pemasukan $pemasukan)
     {
-        //
+        return view('pemasukan.show', compact('pemasukan'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Pemasukan $pemasukan)
     {
-        //
+        return view('pemasukan.edit', compact('pemasukan'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Pemasukan $pemasukan)
     {
-        //
+        $request->validate([
+            'sumber'     => 'required|string|max:255',
+            'kategori'   => 'required|in:pembayaran_jamaah,setoran_tabungan,transaksi_layanan,komisi,lainnya',
+            'jumlah'     => 'required|numeric|min:1',
+            'tanggal'    => 'required|date',
+            'keterangan' => 'nullable|string',
+        ]);
+
+        $pemasukan->update($request->all());
+        return redirect()->route('pemasukan.index')->with('success', 'Data pemasukan berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Pemasukan $pemasukan)
     {
-        //
+        $pemasukan->delete();
+        return redirect()->route('pemasukan.index')->with('success', 'Data pemasukan berhasil dihapus.');
     }
 }

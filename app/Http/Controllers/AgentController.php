@@ -2,63 +2,79 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Agent;
 use Illuminate\Http\Request;
 
 class AgentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $jenis = $request->jenis;
+        $agents = Agent::when($jenis, fn($q) => $q->where('jenis', $jenis))
+            ->latest()->paginate(10);
+        return view('agent.index', compact('agents', 'jenis'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('agent.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama_agent'     => 'required|string|max:255',
+            'nama_pic'       => 'required|string|max:255',
+            'jenis'          => 'required|in:umroh,haji,keduanya',
+            'no_telepon'     => 'required|string|max:20',
+            'email'          => 'nullable|email',
+            'alamat'         => 'nullable|string',
+            'kota'           => 'nullable|string|max:100',
+            'provinsi'       => 'nullable|string|max:100',
+            'komisi_persen'  => 'nullable|numeric|min:0|max:100',
+            'status'         => 'required|in:aktif,nonaktif',
+        ]);
+
+        $data = $request->all();
+        $data['kode_agent'] = 'AGT-' . strtoupper(uniqid());
+
+        Agent::create($data);
+        return redirect()->route('agent.index')->with('success', 'Data agent berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Agent $agent)
     {
-        //
+        $agent->load('pendaftarans.jamaah');
+        return view('agent.show', compact('agent'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Agent $agent)
     {
-        //
+        return view('agent.edit', compact('agent'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Agent $agent)
     {
-        //
+        $request->validate([
+            'nama_agent'     => 'required|string|max:255',
+            'nama_pic'       => 'required|string|max:255',
+            'jenis'          => 'required|in:umroh,haji,keduanya',
+            'no_telepon'     => 'required|string|max:20',
+            'email'          => 'nullable|email',
+            'alamat'         => 'nullable|string',
+            'kota'           => 'nullable|string|max:100',
+            'provinsi'       => 'nullable|string|max:100',
+            'komisi_persen'  => 'nullable|numeric|min:0|max:100',
+            'status'         => 'required|in:aktif,nonaktif',
+        ]);
+
+        $agent->update($request->all());
+        return redirect()->route('agent.index')->with('success', 'Data agent berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Agent $agent)
     {
-        //
+        $agent->delete();
+        return redirect()->route('agent.index')->with('success', 'Data agent berhasil dihapus.');
     }
 }

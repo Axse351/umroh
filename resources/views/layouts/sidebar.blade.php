@@ -24,12 +24,11 @@
                 {{-- ==================== DATA DASHBOARD ==================== --}}
                 <li class="menu-header">Data Dashboard</li>
 
-                {{-- Transaksi --}}
-                <li
-                    class="dropdown {{ request()->is('dashboard/transaksi*') || request()->is('dashboard/jamaah-umroh') ? 'active' : '' }}">
+                {{-- Total Transaksi --}}
+                <li class="dropdown {{ request()->is('dashboard/transaksi*') ? 'active' : '' }}">
                     <a href="#" class="nav-link has-dropdown">
                         <i class="fas fa-chart-line"></i>
-                        <span>Transaksi</span>
+                        <span>Total Transaksi</span>
                     </a>
                     <ul class="dropdown-menu">
                         <li class="{{ request()->is('dashboard/transaksi-umroh') ? 'active' : '' }}">
@@ -42,20 +41,34 @@
                                 Total Transaksi Haji
                             </a>
                         </li>
+                    </ul>
+                </li>
+
+                {{-- Total Jamaah --}}
+                <li class="dropdown {{ request()->is('dashboard/jamaah*') ? 'active' : '' }}">
+                    <a href="#" class="nav-link has-dropdown">
+                        <i class="fas fa-users"></i>
+                        <span>Total Jamaah</span>
+                    </a>
+                    <ul class="dropdown-menu">
                         <li class="{{ request()->is('dashboard/jamaah-umroh') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ url('/dashboard/jamaah-umroh') }}">
                                 Total Jamaah Umroh
                             </a>
                         </li>
+                        <li class="{{ request()->is('dashboard/jamaah-haji') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ url('/dashboard/jamaah-haji') }}">
+                                Total Jamaah Haji
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
-                {{-- Pembayaran --}}
-                <li
-                    class="dropdown {{ request()->is('dashboard/bayar*') || request()->is('dashboard/jamaah-haji') || request()->is('dashboard/tagihan*') ? 'active' : '' }}">
+                {{-- Sudah Membayar --}}
+                <li class="dropdown {{ request()->is('dashboard/bayar*') ? 'active' : '' }}">
                     <a href="#" class="nav-link has-dropdown">
                         <i class="fas fa-money-check-alt"></i>
-                        <span>Pembayaran</span>
+                        <span>Sudah Membayar</span>
                     </a>
                     <ul class="dropdown-menu">
                         <li class="{{ request()->is('dashboard/bayar-umroh') ? 'active' : '' }}">
@@ -68,11 +81,16 @@
                                 Sudah Membayar Haji
                             </a>
                         </li>
-                        <li class="{{ request()->is('dashboard/jamaah-haji') ? 'active' : '' }}">
-                            <a class="nav-link" href="{{ url('/dashboard/jamaah-haji') }}">
-                                Total Jamaah Haji
-                            </a>
-                        </li>
+                    </ul>
+                </li>
+
+                {{-- Sisa Tagihan --}}
+                <li class="dropdown {{ request()->is('dashboard/tagihan*') ? 'active' : '' }}">
+                    <a href="#" class="nav-link has-dropdown">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>Sisa Tagihan</span>
+                    </a>
+                    <ul class="dropdown-menu">
                         <li class="{{ request()->is('dashboard/tagihan-umroh') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ url('/dashboard/tagihan-umroh') }}">
                                 Sisa Tagihan Umroh
@@ -87,8 +105,7 @@
                 </li>
 
                 {{-- Data Tabungan Dashboard --}}
-                <li
-                    class="dropdown {{ request()->is('dashboard/tabungan*') || request()->is('dashboard/total-tabungan*') ? 'active' : '' }}">
+                <li class="dropdown {{ request()->is('dashboard/tabungan*') ? 'active' : '' }}">
                     <a href="#" class="nav-link has-dropdown">
                         <i class="fas fa-piggy-bank"></i>
                         <span>Data Tabungan</span>
@@ -104,6 +121,16 @@
                                 Tabungan Haji
                             </a>
                         </li>
+                    </ul>
+                </li>
+
+                {{-- Total Tabungan --}}
+                <li class="dropdown {{ request()->is('dashboard/total-tabungan*') ? 'active' : '' }}">
+                    <a href="#" class="nav-link has-dropdown">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>Total Tabungan</span>
+                    </a>
+                    <ul class="dropdown-menu">
                         <li class="{{ request()->is('dashboard/total-tabungan-umroh') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ url('/dashboard/total-tabungan-umroh') }}">
                                 Total Tabungan Jamaah Umroh
@@ -111,7 +138,7 @@
                         </li>
                         <li class="{{ request()->is('dashboard/total-tabungan-haji') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ url('/dashboard/total-tabungan-haji') }}">
-                                Total Jamaah Tabungan Haji
+                                Total Tabungan Jamaah Haji
                             </a>
                         </li>
                     </ul>

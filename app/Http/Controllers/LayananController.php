@@ -2,63 +2,71 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Layanan;
 use Illuminate\Http\Request;
 
 class LayananController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $jenis = $request->jenis;
+        $layanans = Layanan::when($jenis, fn($q) => $q->where('jenis', $jenis))
+            ->latest()->paginate(10);
+        return view('layanan.index', compact('layanans', 'jenis'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('layanan.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama_layanan' => 'required|string|max:255',
+            'jenis'        => 'required|in:umroh,haji,keduanya',
+            'kategori'     => 'required|in:visa,asuransi,vaksin,manasik,perlengkapan,transportasi,lainnya',
+            'harga'        => 'required|numeric|min:0',
+            'deskripsi'    => 'nullable|string',
+            'status'       => 'required|in:aktif,nonaktif',
+        ]);
+
+        $data = $request->all();
+        $data['kode_layanan'] = 'LAY-' . strtoupper(uniqid());
+
+        Layanan::create($data);
+        return redirect()->route('layanan.index')->with('success', 'Data layanan berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Layanan $layanan)
     {
-        //
+        $layanan->load('transaksiLayanans.pendaftaran.jamaah');
+        return view('layanan.show', compact('layanan'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Layanan $layanan)
     {
-        //
+        return view('layanan.edit', compact('layanan'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Layanan $layanan)
     {
-        //
+        $request->validate([
+            'nama_layanan' => 'required|string|max:255',
+            'jenis'        => 'required|in:umroh,haji,keduanya',
+            'kategori'     => 'required|in:visa,asuransi,vaksin,manasik,perlengkapan,transportasi,lainnya',
+            'harga'        => 'required|numeric|min:0',
+            'deskripsi'    => 'nullable|string',
+            'status'       => 'required|in:aktif,nonaktif',
+        ]);
+
+        $layanan->update($request->all());
+        return redirect()->route('layanan.index')->with('success', 'Data layanan berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Layanan $layanan)
     {
-        //
+        $layanan->delete();
+        return redirect()->route('layanan.index')->with('success', 'Data layanan berhasil dihapus.');
     }
 }

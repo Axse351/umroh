@@ -2,63 +2,65 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Produk;
+use App\Models\StokOpname;
 use Illuminate\Http\Request;
 
 class StokOpnameController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $stokOpnames = StokOpname::with('produk', 'karyawan')
+            ->latest()->paginate(10);
+        return view('stok-opname.index', compact('stokOpnames'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $produks = Produk::where('status', 'aktif')->get();
+        return view('stok-opname.create', compact('produks'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'produk_id'      => 'required|exists:produks,id',
+            'stok_fisik'     => 'required|integer|min:0',
+            'tanggal_opname' => 'required|date',
+            'keterangan'     => 'nullable|string',
+        ]);
+
+        $produk     = Produk::findOrFail($request->produk_id);
+        $stok_sistem = $produk->stok;
+        $stok_fisik  = $request->stok_fisik;
+        $selisih     = $stok_fisik - $stok_sistem;
+
+        StokOpname::create([
+            'no_opname'      => 'OPN-' . strtoupper(uniqid()),
+            'produk_id'      => $request->produk_id,
+            'karyawan_id'    => auth()->user()->karyawan->id ?? null,
+            'stok_sistem'    => $stok_sistem,
+            'stok_fisik'     => $stok_fisik,
+            'selisih'        => $selisih,
+            'tanggal_opname' => $request->tanggal_opname,
+            'keterangan'     => $request->keterangan,
+        ]);
+
+        // Sesuaikan stok produk dengan hasil fisik
+        $produk->update(['stok' => $stok_fisik]);
+
+        return redirect()->route('stok-opname.index')->with('success', 'Stok opname berhasil dicatat dan stok diperbarui.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(StokOpname $stokOpname)
     {
-        //
+        $stokOpname->load('produk', 'karyawan');
+        return view('stok-opname.show', compact('stokOpname'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function destroy(StokOpname $stokOpname)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $stokOpname->delete();
+        return redirect()->route('stok-opname.index')->with('success', 'Data stok opname berhasil dihapus.');
     }
 }

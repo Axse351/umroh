@@ -2,63 +2,69 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Maskapai;
 use Illuminate\Http\Request;
 
 class MaskapaiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $maskapais = Maskapai::latest()->paginate(10);
+        return view('maskapai.index', compact('maskapais'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('maskapai.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama_maskapai' => 'required|string|max:255',
+            'kode_iata'     => 'nullable|string|max:5',
+            'no_telepon'    => 'nullable|string|max:20',
+            'email'         => 'nullable|email',
+            'website'       => 'nullable|url',
+            'status'        => 'required|in:aktif,nonaktif',
+        ]);
+
+        $data = $request->all();
+        $data['kode_maskapai'] = 'MSK-' . strtoupper(uniqid());
+
+        Maskapai::create($data);
+        return redirect()->route('maskapai.index')->with('success', 'Data maskapai berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Maskapai $maskapai)
     {
-        //
+        $maskapai->load('pakets');
+        return view('maskapai.show', compact('maskapai'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Maskapai $maskapai)
     {
-        //
+        return view('maskapai.edit', compact('maskapai'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Maskapai $maskapai)
     {
-        //
+        $request->validate([
+            'nama_maskapai' => 'required|string|max:255',
+            'kode_iata'     => 'nullable|string|max:5',
+            'no_telepon'    => 'nullable|string|max:20',
+            'email'         => 'nullable|email',
+            'website'       => 'nullable|url',
+            'status'        => 'required|in:aktif,nonaktif',
+        ]);
+
+        $maskapai->update($request->all());
+        return redirect()->route('maskapai.index')->with('success', 'Data maskapai berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Maskapai $maskapai)
     {
-        //
+        $maskapai->delete();
+        return redirect()->route('maskapai.index')->with('success', 'Data maskapai berhasil dihapus.');
     }
 }
