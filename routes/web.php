@@ -1,17 +1,48 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\{
+    AuthController,
+    KaryawanController,
+    AgentController,
+    MaskapaiController,
+    HotelController,
+    PaketController,
+    KeberangkatanController,
+    JamaahController,
+    PendaftaranController,
+    PembayaranController,
+    TabunganController,
+    SetoranController,
+    LayananController,
+    TransaksiLayananController,
+    DokumenController,
+    MitraController,
+    PengeluaranController,
+    SupplierController,
+    ProdukController,
+    PembelianController,
+    PengeluaranProdukController,
+    StokOpnameController,
+    AksesSystemController,
+    SettingController,
+    LaporanController,
+    PemasukanController
+};
 
 // Dashboard per role
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Kasir\DashboardController as KasirDashboard;
 use App\Http\Controllers\User\DashboardController as UserDashboard;
 
-// ==================== AUTH ====================
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+
+/*
+|--------------------------------------------------------------------------
+| AUTH (PAKAI YANG LAMA - ROLE BASED)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', fn() => redirect()->route('login'));
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -23,55 +54,83 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth');
 
 
-// ==================== ADMIN ====================
+/*
+|--------------------------------------------------------------------------
+| ADMIN
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
+        // Dashboard
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
-        // contoh dashboard tambahan
+        // Dashboard tambahan
         Route::get('/dashboard/transaksi-umroh', [AdminDashboard::class, 'transaksiUmroh']);
         Route::get('/dashboard/transaksi-haji', [AdminDashboard::class, 'transaksiHaji']);
 
-        // semua menu kamu pindahkan ke sini
-        Route::resource('pendaftaran', \App\Http\Controllers\PendaftaranController::class);
-        Route::resource('jamaah', \App\Http\Controllers\JamaahController::class);
-        Route::resource('agent', \App\Http\Controllers\AgentController::class);
-        Route::resource('karyawan', \App\Http\Controllers\KaryawanController::class);
-        Route::resource('paket', \App\Http\Controllers\PaketController::class);
-        Route::resource('keberangkatan', \App\Http\Controllers\KeberangkatanController::class);
-        Route::resource('pembayaran', \App\Http\Controllers\PembayaranController::class);
-        Route::resource('pengeluaran', \App\Http\Controllers\PengeluaranController::class);
-        Route::resource('pemasukan', \App\Http\Controllers\PemasukanController::class);
-        Route::resource('laporan', \App\Http\Controllers\LaporanController::class);
-        Route::resource('dokumen', \App\Http\Controllers\DokumenController::class);
-        Route::resource('maskapai', \App\Http\Controllers\MaskapaiController::class);
-        Route::resource('hotel', \App\Http\Controllers\HotelController::class);
+        /*
+        |--------------------------------------------------------------------------
+        | SEMUA FITUR (DARI ROUTE BARU)
+        |--------------------------------------------------------------------------
+        */
 
-        // layanan
-        Route::resource('mitra', \App\Http\Controllers\MitraController::class);
-        Route::resource('layanan', \App\Http\Controllers\LayananController::class);
-        Route::resource('transaksi-layanan', \App\Http\Controllers\TransaksiLayananController::class);
-        Route::resource('tabungan', \App\Http\Controllers\TabunganController::class);
-        Route::resource('setoran', \App\Http\Controllers\SetoranController::class);
+        // CRUD
+        Route::resource('karyawan', KaryawanController::class);
+        Route::resource('agent', AgentController::class);
+        Route::resource('maskapai', MaskapaiController::class);
+        Route::resource('hotel', HotelController::class);
+        Route::resource('paket', PaketController::class);
+        Route::resource('keberangkatan', KeberangkatanController::class);
+        Route::resource('jamaah', JamaahController::class);
+        Route::resource('pendaftaran', PendaftaranController::class);
+        Route::resource('pembayaran', PembayaranController::class);
+        Route::resource('tabungan', TabunganController::class);
+        Route::resource('setoran', SetoranController::class);
+        Route::resource('layanan', LayananController::class);
+        Route::resource('transaksi-layanan', TransaksiLayananController::class);
+        Route::resource('dokumen', DokumenController::class);
+        Route::resource('mitra', MitraController::class);
+        Route::resource('pemasukan', PemasukanController::class);
+        Route::resource('pengeluaran', PengeluaranController::class);
+        Route::resource('supplier', SupplierController::class);
+        Route::resource('produk', ProdukController::class);
+        Route::resource('pembelian', PembelianController::class);
+        Route::resource('pengeluaran-produk', PengeluaranProdukController::class);
+        Route::resource('stok-opname', StokOpnameController::class);
+        Route::resource('akses-system', AksesSystemController::class);
 
-        // gudang
-        Route::resource('produk', \App\Http\Controllers\ProdukController::class);
-        Route::resource('stok-opname', \App\Http\Controllers\StokOpnameController::class);
-        Route::resource('pembelian', \App\Http\Controllers\PembelianController::class);
-        Route::resource('pengeluaran-produk', \App\Http\Controllers\PengeluaranProdukController::class);
-        Route::resource('supplier', \App\Http\Controllers\SupplierController::class);
+        // EXTRA ROUTES
+        Route::post('pembayaran/{pembayaran}/verifikasi', [PembayaranController::class, 'verifikasi'])->name('pembayaran.verifikasi');
+        Route::post('pembayaran/{pembayaran}/tolak',      [PembayaranController::class, 'tolak'])->name('pembayaran.tolak');
+        Route::post('pendaftaran/{pendaftaran}/status',   [PendaftaranController::class, 'updateStatus'])->name('pendaftaran.updateStatus');
+        Route::post('dokumen/{dokumen}/validasi',         [DokumenController::class, 'validasi'])->name('dokumen.validasi');
 
-        // setting
-        Route::resource('akses-system', \App\Http\Controllers\AksesSystemController::class);
-        Route::get('/setting', [\App\Http\Controllers\SettingController::class, 'index'])->name('setting.index');
-        Route::put('/setting', [\App\Http\Controllers\SettingController::class, 'update'])->name('setting.update');
+        // SETTING
+        Route::get('setting', [SettingController::class, 'index'])->name('setting.index');
+        Route::put('setting', [SettingController::class, 'update'])->name('setting.update');
+
+        // LAPORAN
+        Route::get('laporan',               [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('laporan/keuangan',      [LaporanController::class, 'keuangan'])->name('laporan.keuangan');
+        Route::get('laporan/jamaah',        [LaporanController::class, 'jamaah'])->name('laporan.jamaah');
+        Route::get('laporan/pembayaran',    [LaporanController::class, 'pembayaran'])->name('laporan.pembayaran');
+        Route::get('laporan/tabungan',      [LaporanController::class, 'tabungan'])->name('laporan.tabungan');
+        Route::get('laporan/stok',          [LaporanController::class, 'stok'])->name('laporan.stok');
+        Route::get('laporan/keberangkatan', [LaporanController::class, 'keberangkatan'])->name('laporan.keberangkatan');
+        Route::delete('laporan/{laporan}',  [LaporanController::class, 'destroy'])->name('laporan.destroy');
     });
 
 
-// ==================== KASIR ====================
+/*
+|--------------------------------------------------------------------------
+| KASIR (AKSES TERBATAS)
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth', 'role:kasir'])
     ->prefix('kasir')
     ->name('kasir.')
@@ -79,13 +138,17 @@ Route::middleware(['auth', 'role:kasir'])
 
         Route::get('/dashboard', [KasirDashboard::class, 'index'])->name('dashboard');
 
-        // kasir biasanya akses terbatas
-        Route::resource('pembayaran', \App\Http\Controllers\PembayaranController::class);
-        Route::resource('jamaah', \App\Http\Controllers\JamaahController::class);
+        Route::resource('pembayaran', PembayaranController::class);
+        Route::resource('jamaah', JamaahController::class);
     });
 
 
-// ==================== USER ====================
+/*
+|--------------------------------------------------------------------------
+| USER (VIEW ONLY)
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth', 'role:user'])
     ->prefix('user')
     ->name('user.')
@@ -93,7 +156,6 @@ Route::middleware(['auth', 'role:user'])
 
         Route::get('/dashboard', [UserDashboard::class, 'index'])->name('dashboard');
 
-        // user hanya lihat data
         Route::get('/riwayat', [UserDashboard::class, 'riwayat']);
-        Route::get('/profil', [UserDashboard::class, 'profil']);
+        Route::get('/profil',  [UserDashboard::class, 'profil']);
     });

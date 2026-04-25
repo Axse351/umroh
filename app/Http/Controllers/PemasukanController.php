@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pemasukan;
 use Illuminate\Http\Request;
 
-class PemasukkanController extends Controller
+class PemasukanController extends Controller
 {
     public function index(Request $request)
     {
@@ -23,6 +23,7 @@ class PemasukkanController extends Controller
 
         return view('pemasukan.index', compact('pemasukans', 'total', 'kategori', 'bulan', 'tahun'));
     }
+
 
     public function create()
     {
