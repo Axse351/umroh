@@ -1,110 +1,168 @@
 @extends('layouts.app')
-@section('title', 'Edit Pendaftaran')
-@section('page-title', 'Edit Pendaftaran')
-@section('breadcrumb')
-    <div class="breadcrumb-item"><a href="{{ route('admin.pendaftaran.index') }}">Data Pendaftaran</a></div>
-    <div class="breadcrumb-item active">Edit</div>
-@endsection
+
+@section('title', 'Data Pembayaran')
+
 @section('content')
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Form Edit Pendaftaran &mdash; <small class="text-muted">{{ $pendaftaran->no_pendaftaran }}</small>
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.pendaftaran.update', $pendaftaran) }}" method="POST">
-                        @csrf @method('PUT')
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Jamaah</label>
-                                    <input type="text" class="form-control"
-                                        value="{{ $pendaftaran->jamaah->nama_lengkap }}" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Keberangkatan</label>
-                                    <input type="text" class="form-control"
-                                        value="{{ $pendaftaran->keberangkatan->paket->nama_paket ?? '-' }} - {{ $pendaftaran->keberangkatan->tanggal_berangkat?->format('d/m/Y') }}"
-                                        readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Tipe Kamar</label>
-                                    <select name="tipe_kamar" class="form-control">
-                                        <option value="double"
-                                            {{ old('tipe_kamar', $pendaftaran->tipe_kamar) == 'double' ? 'selected' : '' }}>
-                                            Double
-                                        </option>
-                                        <option value="triple"
-                                            {{ old('tipe_kamar', $pendaftaran->tipe_kamar) == 'triple' ? 'selected' : '' }}>
-                                            Triple
-                                        </option>
-                                        <option value="quad"
-                                            {{ old('tipe_kamar', $pendaftaran->tipe_kamar) == 'quad' ? 'selected' : '' }}>
-                                            Quad
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Harga Jual</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend"><span class="input-group-text">Rp</span></div>
-                                        <input type="number" name="harga_jual" class="form-control"
-                                            value="{{ old('harga_jual', $pendaftaran->harga_jual) }}">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>DP Minimal</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend"><span class="input-group-text">Rp</span></div>
-                                        <input type="number" name="dp_minimal" class="form-control"
-                                            value="{{ old('dp_minimal', $pendaftaran->dp_minimal) }}">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Batas Pelunasan</label>
-                                    <input type="date" name="batas_pelunasan" class="form-control"
-                                        value="{{ old('batas_pelunasan', $pendaftaran->batas_pelunasan?->format('Y-m-d')) }}">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Status</label>
-                                    <select name="status" class="form-control">
-                                        @foreach (['draft', 'konfirmasi', 'dp_terbayar', 'lunas', 'berangkat', 'selesai', 'batal', 'refund'] as $s)
-                                            <option value="{{ $s }}"
-                                                {{ old('status', $pendaftaran->status) == $s ? 'selected' : '' }}>
-                                                {{ ucfirst(str_replace('_', ' ', $s)) }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label>Catatan</label>
-                                    <textarea name="catatan" class="form-control" rows="2">{{ old('catatan', $pendaftaran->catatan) }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group mt-2">
-                            <button type="submit" class="btn btn-warning"><i class="fas fa-save mr-1"></i> Update</button>
-                            <a href="{{ route('admin.pendaftaran.index') }}" class="btn btn-secondary ml-2"><i
-                                    class="fas fa-arrow-left mr-1"></i> Kembali</a>
-                        </div>
-                    </form>
+    <div class="container-fluid px-4 py-4">
+
+        {{-- Header --}}
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h4 class="fw-bold mb-0">Data Pembayaran</h4>
+                <small class="text-muted">Kelola seluruh transaksi pembayaran jamaah</small>
+            </div>
+            <a href="{{ route('admin.pembayaran.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Tambah Pembayaran
+            </a>
+        </div>
+
+        {{-- Alert --}}
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        {{-- Filter Status --}}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body py-2">
+                <div class="d-flex gap-2 flex-wrap align-items-center">
+                    <span class="text-muted small me-1">Filter:</span>
+                    @foreach (['', 'pending', 'verifikasi', 'diterima', 'ditolak'] as $s)
+                        <a href="{{ route('admin.pembayaran.index', $s ? ['status' => $s] : []) }}"
+                            class="btn btn-sm {{ $status === $s || ($s === '' && !$status) ? 'btn-primary' : 'btn-outline-secondary' }}">
+                            {{ $s === '' ? 'Semua' : ucfirst($s) }}
+                        </a>
+                    @endforeach
                 </div>
             </div>
         </div>
+
+        {{-- Table --}}
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-3">#</th>
+                                <th>No. Pembayaran</th>
+                                <th>Jamaah</th>
+                                <th>No. Pendaftaran</th>
+                                <th>Jenis</th>
+                                <th>Metode</th>
+                                <th>Jumlah</th>
+                                <th>Tanggal</th>
+                                <th>Status</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($pembayarans as $item)
+                                <tr>
+                                    <td class="px-3 text-muted small">{{ $pembayarans->firstItem() + $loop->index }}</td>
+                                    <td>
+                                        <span class="fw-semibold font-monospace small">{{ $item->no_pembayaran }}</span>
+                                    </td>
+                                    <td>{{ $item->pendaftaran->jamaah->nama_lengkap ?? '-' }}</td>
+                                    <td>
+                                        <span class="font-monospace small text-muted">
+                                            {{ $item->pendaftaran->no_pendaftaran ?? '-' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $jenisBadge =
+                                                [
+                                                    'dp' => 'warning',
+                                                    'cicilan' => 'info',
+                                                    'pelunasan' => 'success',
+                                                    'lainnya' => 'secondary',
+                                                ][$item->jenis] ?? 'secondary';
+                                        @endphp
+                                        <span class="badge bg-{{ $jenisBadge }}">{{ ucfirst($item->jenis) }}</span>
+                                    </td>
+                                    <td>{{ ucfirst($item->metode_bayar) }}</td>
+                                    <td class="fw-semibold">
+                                        Rp {{ number_format($item->jumlah_bayar, 0, ',', '.') }}
+                                    </td>
+                                    <td>{{ \Carbon\Carbon::parse($item->tanggal_bayar)->isoFormat('D MMM Y') }}</td>
+                                    <td>
+                                        @php
+                                            $statusBadge =
+                                                [
+                                                    'pending' => 'secondary',
+                                                    'verifikasi' => 'warning',
+                                                    'diterima' => 'success',
+                                                    'ditolak' => 'danger',
+                                                ][$item->status] ?? 'secondary';
+                                        @endphp
+                                        <span class="badge bg-{{ $statusBadge }}">{{ ucfirst($item->status) }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-1 justify-content-center">
+
+                                            {{-- Verifikasi / Tolak --}}
+                                            @if ($item->status === 'pending' || $item->status === 'verifikasi')
+                                                <form action="{{ route('admin.pembayaran.verifikasi', $item) }}"
+                                                    method="POST">
+                                                    @csrf
+                                                    <button class="btn btn-sm btn-success" title="Terima"
+                                                        onclick="return confirm('Terima pembayaran ini?')">
+                                                        <i class="bi bi-check-lg"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('admin.pembayaran.tolak', $item) }}" method="POST">
+                                                    @csrf
+                                                    <button class="btn btn-sm btn-danger" title="Tolak"
+                                                        onclick="return confirm('Tolak pembayaran ini?')">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            <a href="{{ route('admin.pembayaran.show', $item) }}"
+                                                class="btn btn-sm btn-outline-info" title="Detail">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ route('admin.pembayaran.edit', $item) }}"
+                                                class="btn btn-sm btn-outline-warning" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form action="{{ route('admin.pembayaran.destroy', $item) }}" method="POST"
+                                                onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                                @csrf @method('DELETE')
+                                                <button class="btn btn-sm btn-outline-danger" title="Hapus">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="10" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                        Belum ada data pembayaran.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @if ($pembayarans->hasPages())
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        Menampilkan {{ $pembayarans->firstItem() }}–{{ $pembayarans->lastItem() }}
+                        dari {{ $pembayarans->total() }} data
+                    </small>
+                    {{ $pembayarans->appends(request()->query())->links() }}
+                </div>
+            @endif
+        </div>
+
     </div>
 @endsection

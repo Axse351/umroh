@@ -29,7 +29,7 @@
                             </select>
                             <button class="btn btn-sm btn-secondary"><i class="fas fa-search"></i></button>
                         </form>
-                        <a href="{{ route('dokumen.create') }}" class="btn btn-primary btn-sm"><i
+                        <a href="{{ route('admin.dokumen.create') }}" class="btn btn-primary btn-sm"><i
                                 class="fas fa-plus mr-1"></i> Upload</a>
                     </div>
                 </div>

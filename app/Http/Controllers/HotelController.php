@@ -74,4 +74,3 @@ class HotelController extends Controller
         return redirect()->route('hotel.index')->with('success', 'Data hotel berhasil dihapus.');
     }
 }
-    

@@ -2,7 +2,7 @@
 @section('title', 'Tambah Hotel')
 @section('page-title', 'Tambah Hotel')
 @section('breadcrumb')
-    <div class="breadcrumb-item"><a href="{{ route('hotel.index') }}">Data Hotel</a></div>
+    <div class="breadcrumb-item"><a href="{{ route('admin.hotel.index') }}">Data Hotel</a></div>
     <div class="breadcrumb-item active">Tambah</div>
 @endsection
 @section('content')
@@ -13,7 +13,7 @@
                     <h4>Form Tambah Hotel</h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('hotel.store') }}" method="POST">
+                    <form action="{{ route('admin.hotel.store') }}" method="POST">
                         @csrf
                         <div class="row">
                             <div class="col-md-8">

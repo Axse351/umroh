@@ -2,7 +2,7 @@
 @section('title', 'Edit Hotel')
 @section('page-title', 'Edit Hotel')
 @section('breadcrumb')
-    <div class="breadcrumb-item"><a href="{{ route('hotel.index') }}">Data Hotel</a></div>
+    <div class="breadcrumb-item"><a href="{{ route('admin.hotel.index') }}">Data Hotel</a></div>
     <div class="breadcrumb-item active">Edit</div>
 @endsection
 @section('content')
@@ -13,7 +13,7 @@
                     <h4>Form Edit Hotel</h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('hotel.update', $hotel) }}" method="POST">
+                    <form action="{{ route('admin.hotel.update', $hotel) }}" method="POST">
                         @csrf @method('PUT')
                         <div class="row">
                             <div class="col-md-8">
@@ -27,11 +27,14 @@
                                 <div class="form-group">
                                     <label>Lokasi <span class="text-danger">*</span></label>
                                     <select name="lokasi" class="form-control">
-                                        <option value="mekkah" {{ old('lokasi', $hotel->lokasi) == 'mekkah' ? 'selected' : '' }}>
+                                        <option value="mekkah"
+                                            {{ old('lokasi', $hotel->lokasi) == 'mekkah' ? 'selected' : '' }}>
                                             Mekkah</option>
                                         <option value="madinah"
-                                            {{ old('lokasi', $hotel->lokasi) == 'madinah' ? 'selected' : '' }}>Madinah</option>
-                                        <option value="jeddah" {{ old('lokasi', $hotel->lokasi) == 'jeddah' ? 'selected' : '' }}>
+                                            {{ old('lokasi', $hotel->lokasi) == 'madinah' ? 'selected' : '' }}>Madinah
+                                        </option>
+                                        <option value="jeddah"
+                                            {{ old('lokasi', $hotel->lokasi) == 'jeddah' ? 'selected' : '' }}>
                                             Jeddah</option>
                                     </select>
                                 </div>
@@ -42,7 +45,8 @@
                                     <select name="bintang" class="form-control">
                                         @for ($i = 1; $i <= 5; $i++)
                                             <option value="{{ $i }}"
-                                                {{ old('bintang', $hotel->bintang) == $i ? 'selected' : '' }}>{{ $i }}
+                                                {{ old('bintang', $hotel->bintang) == $i ? 'selected' : '' }}>
+                                                {{ $i }}
                                                 Bintang</option>
                                         @endfor
                                     </select>
@@ -81,7 +85,8 @@
                                         <option value="aktif"
                                             {{ old('status', $hotel->status) == 'aktif' ? 'selected' : '' }}>Aktif</option>
                                         <option value="nonaktif"
-                                            {{ old('status', $hotel->status) == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                            {{ old('status', $hotel->status) == 'nonaktif' ? 'selected' : '' }}>Nonaktif
+                                        </option>
                                     </select>
                                 </div>
                             </div>
