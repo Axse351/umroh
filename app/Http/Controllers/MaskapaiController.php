@@ -33,7 +33,7 @@ class MaskapaiController extends Controller
         $data['kode_maskapai'] = 'MSK-' . strtoupper(uniqid());
 
         Maskapai::create($data);
-        return redirect()->route('maskapai.index')->with('success', 'Data maskapai berhasil ditambahkan.');
+        return redirect()->route('admin.maskapai.index')->with('success', 'Data maskapai berhasil ditambahkan.');
     }
 
     public function show(Maskapai $maskapai)
@@ -59,12 +59,12 @@ class MaskapaiController extends Controller
         ]);
 
         $maskapai->update($request->all());
-        return redirect()->route('maskapai.index')->with('success', 'Data maskapai berhasil diperbarui.');
+        return redirect()->route('admin.maskapai.index')->with('success', 'Data maskapai berhasil diperbarui.');
     }
 
     public function destroy(Maskapai $maskapai)
     {
         $maskapai->delete();
-        return redirect()->route('maskapai.index')->with('success', 'Data maskapai berhasil dihapus.');
+        return redirect()->route('admin.maskapai.index')->with('success', 'Data maskapai berhasil dihapus.');
     }
 }
