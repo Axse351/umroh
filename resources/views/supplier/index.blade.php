@@ -21,7 +21,7 @@
                             </select>
                             <button class="btn btn-sm btn-secondary"><i class="fas fa-search"></i></button>
                         </form>
-                        <a href="{{ route('supplier.create') }}" class="btn btn-primary btn-sm"><i
+                        <a href="{{ route('admin.supplier.create') }}" class="btn btn-primary btn-sm"><i
                                 class="fas fa-plus mr-1"></i> Tambah</a>
                     </div>
                 </div>
@@ -59,11 +59,11 @@
                                                 class="badge badge-{{ $s->status == 'aktif' ? 'success' : 'danger' }}">{{ ucfirst($s->status) }}</span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('supplier.show', $s) }}" class="btn btn-info btn-sm"><i
+                                            <a href="{{ route('admin.supplier.show', $s) }}" class="btn btn-info btn-sm"><i
                                                     class="fas fa-eye"></i></a>
-                                            <a href="{{ route('supplier.edit', $s) }}" class="btn btn-warning btn-sm"><i
-                                                    class="fas fa-edit"></i></a>
-                                            <form action="{{ route('supplier.destroy', $s) }}" method="POST"
+                                            <a href="{{ route('admin.supplier.edit', $s) }}"
+                                                class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+                                            <form action="{{ route('admin.supplier.destroy', $s) }}" method="POST"
                                                 class="d-inline" onsubmit="return confirm('Yakin hapus?')">
                                                 @csrf @method('DELETE')
                                                 <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>

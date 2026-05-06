@@ -94,7 +94,8 @@
                 </a>
             </li>
 
-            <li class="{{ request()->is('admin/pengeluaran*') ? 'active' : '' }}">
+            <li
+                class="{{ request()->is('admin/pengeluaran') || request()->is('admin/pengeluaran/*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.pengeluaran.index') }}">
                     <i class="fas fa-arrow-circle-down"></i>
                     <span>Data Pengeluaran</span>
