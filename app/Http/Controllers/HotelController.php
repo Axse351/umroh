@@ -37,7 +37,7 @@ class HotelController extends Controller
         $data['kode_hotel'] = 'HTL-' . strtoupper(uniqid());
 
         Hotel::create($data);
-        return redirect()->route('hotel.index')->with('success', 'Data hotel berhasil ditambahkan.');
+        return redirect()->route('admin.hotel.index')->with('success', 'Data hotel berhasil ditambahkan.');
     }
 
     public function show(Hotel $hotel)
@@ -65,12 +65,12 @@ class HotelController extends Controller
         ]);
 
         $hotel->update($request->all());
-        return redirect()->route('hotel.index')->with('success', 'Data hotel berhasil diperbarui.');
+        return redirect()->route('admin.hotel.index')->with('success', 'Data hotel berhasil diperbarui.');
     }
 
     public function destroy(Hotel $hotel)
     {
         $hotel->delete();
-        return redirect()->route('hotel.index')->with('success', 'Data hotel berhasil dihapus.');
+        return redirect()->route('admin.hotel.index')->with('success', 'Data hotel berhasil dihapus.');
     }
 }

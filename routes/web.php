@@ -122,6 +122,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('laporan/stok',          [LaporanController::class, 'stok'])->name('laporan.stok');
         Route::get('laporan/keberangkatan', [LaporanController::class, 'keberangkatan'])->name('laporan.keberangkatan');
         Route::delete('laporan/{laporan}',  [LaporanController::class, 'destroy'])->name('laporan.destroy');
+
+        Route::get('mutasi',                [MutasiController::class, 'index'])->name('mutasi.index');
+        Route::get('mutasi/{jamaah}',       [MutasiController::class, 'show'])->name('mutasi.show');
+        Route::get('mutasi/{jamaah}/cetak', [MutasiController::class, 'cetak'])->name('mutasi.cetak');
     });
 
 
