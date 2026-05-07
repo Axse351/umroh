@@ -38,7 +38,7 @@ class SupplierController extends Controller
         $data['kode_supplier'] = 'SUP-' . strtoupper(uniqid());
 
         Supplier::create($data);
-        return redirect()->route('supplier.index')->with('success', 'Data supplier berhasil ditambahkan.');
+        return redirect()->route('admin.supplier.index')->with('success', 'Data supplier berhasil ditambahkan.');
     }
 
     public function show(Supplier $supplier)
@@ -67,12 +67,12 @@ class SupplierController extends Controller
         ]);
 
         $supplier->update($request->all());
-        return redirect()->route('supplier.index')->with('success', 'Data supplier berhasil diperbarui.');
+        return redirect()->route('admin.supplier.index')->with('success', 'Data supplier berhasil diperbarui.');
     }
 
     public function destroy(Supplier $supplier)
     {
         $supplier->delete();
-        return redirect()->route('supplier.index')->with('success', 'Data supplier berhasil dihapus.');
+        return redirect()->route('admin.supplier.index')->with('success', 'Data supplier berhasil dihapus.');
     }
 }
