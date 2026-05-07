@@ -49,7 +49,7 @@ class PaketController extends Controller
         $data['kode_paket'] = 'PKT-' . strtoupper(uniqid());
 
         Paket::create($data);
-        return redirect()->route('paket.index')->with('success', 'Data paket berhasil ditambahkan.');
+        return redirect()->route('admin.paket.index')->with('success', 'Data paket berhasil ditambahkan.');
     }
 
     public function show(Paket $paket)
@@ -86,12 +86,12 @@ class PaketController extends Controller
         ]);
 
         $paket->update($request->all());
-        return redirect()->route('paket.index')->with('success', 'Data paket berhasil diperbarui.');
+        return redirect()->route('admin.paket.index')->with('success', 'Data paket berhasil diperbarui.');
     }
 
     public function destroy(Paket $paket)
     {
         $paket->delete();
-        return redirect()->route('paket.index')->with('success', 'Data paket berhasil dihapus.');
+        return redirect()->route('admin.paket.index')->with('success', 'Data paket berhasil dihapus.');
     }
 }
