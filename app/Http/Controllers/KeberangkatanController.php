@@ -47,7 +47,7 @@ class KeberangkatanController extends Controller
         $data['kode_keberangkatan'] = 'KBR-' . strtoupper(uniqid());
 
         Keberangkatan::create($data);
-        return redirect()->route('keberangkatan.index')->with('success', 'Data keberangkatan berhasil ditambahkan.');
+        return redirect()->route('admin.keberangkatan.index')->with('success', 'Data keberangkatan berhasil ditambahkan.');
     }
 
     public function show(Keberangkatan $keberangkatan)
@@ -80,12 +80,12 @@ class KeberangkatanController extends Controller
         ]);
 
         $keberangkatan->update($request->all());
-        return redirect()->route('keberangkatan.index')->with('success', 'Data keberangkatan berhasil diperbarui.');
+        return redirect()->route('admin.keberangkatan.index')->with('success', 'Data keberangkatan berhasil diperbarui.');
     }
 
     public function destroy(Keberangkatan $keberangkatan)
     {
         $keberangkatan->delete();
-        return redirect()->route('keberangkatan.index')->with('success', 'Data keberangkatan berhasil dihapus.');
+        return redirect()->route('admin.keberangkatan.index')->with('success', 'Data keberangkatan berhasil dihapus.');
     }
 }
