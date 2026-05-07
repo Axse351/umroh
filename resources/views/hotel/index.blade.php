@@ -90,15 +90,15 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <a href="{{ route('hotel.show', $item) }}" class="btn btn-sm btn-info btn-icon"
+                                            <a href="{{ route('admin.hotel.show', $item) }}" class="btn btn-sm btn-info btn-icon"
                                                 title="Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('hotel.edit', $item) }}"
+                                            <a href="{{ route('admin.hotel.edit', $item) }}"
                                                 class="btn btn-sm btn-warning btn-icon" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <form action="{{ route('hotel.destroy', $item) }}" method="POST"
+                                            <form action="{{ route('admin.hotel.destroy', $item) }}" method="POST"
                                                 class="d-inline" onsubmit="return confirm('Yakin hapus hotel ini?')">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger btn-icon"
