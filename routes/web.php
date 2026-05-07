@@ -126,6 +126,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('mutasi',                [MutasiController::class, 'index'])->name('mutasi.index');
         Route::get('mutasi/{jamaah}',       [MutasiController::class, 'show'])->name('mutasi.show');
         Route::get('mutasi/{jamaah}/cetak', [MutasiController::class, 'cetak'])->name('mutasi.cetak');
+
+        Route::patch('pendaftaran/{pendaftaran}/status', [PendaftaranController::class, 'updateStatus'])
+         ->name('pendaftaran.update-status');
+
     });
 
 
