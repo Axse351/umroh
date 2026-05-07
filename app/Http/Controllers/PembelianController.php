@@ -73,7 +73,7 @@ class PembelianController extends Controller
             }
         });
 
-        return redirect()->route('pembelian.index')->with('success', 'Data pembelian berhasil ditambahkan.');
+        return redirect()->route('admin.pembelian.index')->with('success', 'Data pembelian berhasil ditambahkan.');
     }
 
     public function show(Pembelian $pembelian)
@@ -106,12 +106,12 @@ class PembelianController extends Controller
             }
         }
 
-        return redirect()->route('pembelian.index')->with('success', 'Data pembelian berhasil diperbarui.');
+        return redirect()->route('admin.pembelian.index')->with('success', 'Data pembelian berhasil diperbarui.');
     }
 
     public function destroy(Pembelian $pembelian)
     {
         $pembelian->delete();
-        return redirect()->route('pembelian.index')->with('success', 'Data pembelian berhasil dihapus.');
+        return redirect()->route('admin.pembelian.index')->with('success', 'Data pembelian berhasil dihapus.');
     }
 }

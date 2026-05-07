@@ -61,7 +61,7 @@ class PendaftaranController extends Controller
         // Update slot terisi di keberangkatan
         $pendaftaran->keberangkatan->increment('terisi');
 
-        return redirect()->route('pendaftaran.show', $pendaftaran)
+        return redirect()->route('admin.pendaftaran.show', $pendaftaran)
             ->with('success', 'Pendaftaran berhasil dibuat.');
     }
 
@@ -101,7 +101,7 @@ class PendaftaranController extends Controller
         ]);
 
         $pendaftaran->update($request->all());
-        return redirect()->route('pendaftaran.show', $pendaftaran)
+        return redirect()->route('admin.pendaftaran.show', $pendaftaran)
             ->with('success', 'Data pendaftaran berhasil diperbarui.');
     }
 
@@ -109,7 +109,7 @@ class PendaftaranController extends Controller
     {
         $pendaftaran->keberangkatan->decrement('terisi');
         $pendaftaran->delete();
-        return redirect()->route('pendaftaran.index')->with('success', 'Data pendaftaran berhasil dihapus.');
+        return redirect()->route('admin.pendaftaran.index')->with('success', 'Data pendaftaran berhasil dihapus.');
     }
 
     public function updateStatus(Request $request, Pendaftaran $pendaftaran)

@@ -45,7 +45,7 @@ class PemasukanController extends Controller
         $data['karyawan_id']  = auth()->user()->karyawan->id ?? null;
 
         Pemasukan::create($data);
-        return redirect()->route('pemasukan.index')->with('success', 'Data pemasukan berhasil ditambahkan.');
+        return redirect()->route('admin.pemasukan.index')->with('success', 'Data pemasukan berhasil ditambahkan.');
     }
 
     public function show(Pemasukan $pemasukan)
@@ -69,12 +69,12 @@ class PemasukanController extends Controller
         ]);
 
         $pemasukan->update($request->all());
-        return redirect()->route('pemasukan.index')->with('success', 'Data pemasukan berhasil diperbarui.');
+        return redirect()->route('admin.pemasukan.index')->with('success', 'Data pemasukan berhasil diperbarui.');
     }
 
     public function destroy(Pemasukan $pemasukan)
     {
         $pemasukan->delete();
-        return redirect()->route('pemasukan.index')->with('success', 'Data pemasukan berhasil dihapus.');
+        return redirect()->route('admin.pemasukan.index')->with('success', 'Data pemasukan berhasil dihapus.');
     }
 }

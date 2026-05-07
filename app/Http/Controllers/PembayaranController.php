@@ -52,7 +52,7 @@ class PembayaranController extends Controller
         }
 
         Pembayaran::create($data);
-        return redirect()->route('pembayaran.index')->with('success', 'Data pembayaran berhasil ditambahkan.');
+        return redirect()->route('admin.pembayaran.index')->with('success', 'Data pembayaran berhasil ditambahkan.');
     }
 
     public function show(Pembayaran $pembayaran)
@@ -98,14 +98,14 @@ class PembayaranController extends Controller
             }
         }
 
-        return redirect()->route('pembayaran.index')->with('success', 'Data pembayaran berhasil diperbarui.');
+        return redirect()->route('admin.pembayaran.index')->with('success', 'Data pembayaran berhasil diperbarui.');
     }
 
     public function destroy(Pembayaran $pembayaran)
     {
         if ($pembayaran->bukti_bayar) Storage::disk('public')->delete($pembayaran->bukti_bayar);
         $pembayaran->delete();
-        return redirect()->route('pembayaran.index')->with('success', 'Data pembayaran berhasil dihapus.');
+        return redirect()->route('admin.pembayaran.index')->with('success', 'Data pembayaran berhasil dihapus.');
     }
 
     public function verifikasi(Pembayaran $pembayaran)
