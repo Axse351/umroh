@@ -91,7 +91,7 @@
                         </div>
                         <div class="form-group mt-2">
                             <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Simpan</button>
-                            <a href="{{ route('hotel.index') }}" class="btn btn-secondary ml-2"><i
+                            <a href="{{ route('admin.hotel.index') }}" class="btn btn-secondary ml-2"><i
                                     class="fas fa-arrow-left mr-1"></i> Kembali</a>
                         </div>
                     </form>
