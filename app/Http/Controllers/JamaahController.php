@@ -61,7 +61,7 @@ class JamaahController extends Controller
         }
 
         Jamaah::create($data);
-        return redirect()->route('jamaah.index')->with('success', 'Data jamaah berhasil ditambahkan.');
+        return redirect()->route('admin.jamaah.index')->with('success', 'Data jamaah berhasil ditambahkan.');
     }
 
     public function show(Jamaah $jamaah)
@@ -105,7 +105,7 @@ class JamaahController extends Controller
         }
 
         $jamaah->update($data);
-        return redirect()->route('jamaah.index')->with('success', 'Data jamaah berhasil diperbarui.');
+        return redirect()->route('admin.jamaah.index')->with('success', 'Data jamaah berhasil diperbarui.');
     }
 
     public function destroy(Jamaah $jamaah)
@@ -114,6 +114,6 @@ class JamaahController extends Controller
             if ($jamaah->$field) Storage::disk('public')->delete($jamaah->$field);
         }
         $jamaah->delete();
-        return redirect()->route('jamaah.index')->with('success', 'Data jamaah berhasil dihapus.');
+        return redirect()->route('admin.jamaah.index')->with('success', 'Data jamaah berhasil dihapus.');
     }
 }
