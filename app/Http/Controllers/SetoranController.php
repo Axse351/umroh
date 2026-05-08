@@ -61,7 +61,7 @@ class SetoranController extends Controller
             $tabungan->update(['status' => 'selesai']);
         }
 
-        return redirect()->route('setoran.index')->with('success', 'Data setoran berhasil ditambahkan.');
+        return redirect()->route('admin.setoran.index')->with('success', 'Data setoran berhasil ditambahkan.');
     }
 
     public function show(Setoran $setoran)
@@ -82,6 +82,6 @@ class SetoranController extends Controller
 
         if ($setoran->bukti_setor) Storage::disk('public')->delete($setoran->bukti_setor);
         $setoran->delete();
-        return redirect()->route('setoran.index')->with('success', 'Data setoran berhasil dihapus.');
+        return redirect()->route('admin.setoran.index')->with('success', 'Data setoran berhasil dihapus.');
     }
 }

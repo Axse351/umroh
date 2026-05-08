@@ -41,7 +41,7 @@ class TabunganController extends Controller
         $data['status'] = 'aktif';
 
         Tabungan::create($data);
-        return redirect()->route('tabungan.index')->with('success', 'Rekening tabungan berhasil dibuat.');
+        return redirect()->route('admin.tabungan.index')->with('success', 'Rekening tabungan berhasil dibuat.');
     }
 
     public function show(Tabungan $tabungan)
@@ -66,12 +66,12 @@ class TabunganController extends Controller
         ]);
 
         $tabungan->update($request->all());
-        return redirect()->route('tabungan.index')->with('success', 'Data tabungan berhasil diperbarui.');
+        return redirect()->route('admin.tabungan.index')->with('success', 'Data tabungan berhasil diperbarui.');
     }
 
     public function destroy(Tabungan $tabungan)
     {
         $tabungan->delete();
-        return redirect()->route('tabungan.index')->with('success', 'Data tabungan berhasil dihapus.');
+        return redirect()->route('admin.tabungan.index')->with('success', 'Data tabungan berhasil dihapus.');
     }
 }

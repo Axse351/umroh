@@ -26,10 +26,6 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show">{{ session('success') }}<button
-                                type="button" class="close" data-dismiss="alert">&times;</button></div>
-                    @endif
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead class="thead-dark">

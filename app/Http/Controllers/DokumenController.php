@@ -60,7 +60,7 @@ class DokumenController extends Controller
             'catatan'         => $request->catatan,
         ]);
 
-        return redirect()->route('dokumen.index')->with('success', 'Dokumen berhasil diunggah.');
+        return redirect()->route('admin.dokumen.index')->with('success', 'Dokumen berhasil diunggah.');
     }
 
     public function show(Dokumen $dokumen)
@@ -97,14 +97,14 @@ class DokumenController extends Controller
         }
 
         $dokumen->update($data);
-        return redirect()->route('dokumen.index')->with('success', 'Data dokumen berhasil diperbarui.');
+        return redirect()->route('admin.dokumen.index')->with('success', 'Data dokumen berhasil diperbarui.');
     }
 
     public function destroy(Dokumen $dokumen)
     {
         Storage::disk('public')->delete($dokumen->file_path);
         $dokumen->delete();
-        return redirect()->route('dokumen.index')->with('success', 'Dokumen berhasil dihapus.');
+        return redirect()->route('admin.dokumen.index')->with('success', 'Dokumen berhasil dihapus.');
     }
 
     public function validasi(Dokumen $dokumen)

@@ -44,7 +44,7 @@ class TransaksiLayananController extends Controller
         $data['total_harga']  = $data['qty'] * $data['harga_satuan'];
 
         TransaksiLayanan::create($data);
-        return redirect()->route('transaksi-layanan.index')->with('success', 'Transaksi layanan berhasil ditambahkan.');
+        return redirect()->route('admin.transaksi-layanan.index')->with('success', 'Transaksi layanan berhasil ditambahkan.');
     }
 
     public function show(TransaksiLayanan $transaksiLayanan)
@@ -74,12 +74,12 @@ class TransaksiLayananController extends Controller
         $data['total_harga'] = $data['qty'] * $data['harga_satuan'];
 
         $transaksiLayanan->update($data);
-        return redirect()->route('transaksi-layanan.index')->with('success', 'Transaksi layanan berhasil diperbarui.');
+        return redirect()->route('admin.transaksi-layanan.index')->with('success', 'Transaksi layanan berhasil diperbarui.');
     }
 
     public function destroy(TransaksiLayanan $transaksiLayanan)
     {
         $transaksiLayanan->delete();
-        return redirect()->route('transaksi-layanan.index')->with('success', 'Transaksi layanan berhasil dihapus.');
+        return redirect()->route('admin.transaksi-layanan.index')->with('success', 'Transaksi layanan berhasil dihapus.');
     }
 }

@@ -120,7 +120,7 @@
                                         <td>{{ $item->karyawan->nama ?? '-' }}</td>
                                         <td>{{ $item->created_at->isoFormat('D MMM Y') }}</td>
                                         <td class="text-center">
-                                            <form action="{{ route('laporan.destroy', $item) }}" method="POST"
+                                            <form action="{{ route('admin.laporan.destroy', $item) }}" method="POST"
                                                 onsubmit="return confirm('Hapus laporan ini?')">
                                                 @csrf @method('DELETE')
                                                 <button class="btn btn-danger btn-sm">

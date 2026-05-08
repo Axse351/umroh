@@ -35,7 +35,7 @@ class LayananController extends Controller
         $data['kode_layanan'] = 'LAY-' . strtoupper(uniqid());
 
         Layanan::create($data);
-        return redirect()->route('layanan.index')->with('success', 'Data layanan berhasil ditambahkan.');
+        return redirect()->route('admin.layanan.index')->with('success', 'Data layanan berhasil ditambahkan.');
     }
 
     public function show(Layanan $layanan)
@@ -61,12 +61,12 @@ class LayananController extends Controller
         ]);
 
         $layanan->update($request->all());
-        return redirect()->route('layanan.index')->with('success', 'Data layanan berhasil diperbarui.');
+        return redirect()->route('admin.layanan.index')->with('success', 'Data layanan berhasil diperbarui.');
     }
 
     public function destroy(Layanan $layanan)
     {
         $layanan->delete();
-        return redirect()->route('layanan.index')->with('success', 'Data layanan berhasil dihapus.');
+        return redirect()->route('admin.layanan.index')->with('success', 'Data layanan berhasil dihapus.');
     }
 }

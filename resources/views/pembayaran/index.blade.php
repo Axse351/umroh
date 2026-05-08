@@ -19,16 +19,6 @@
                 </div>
                 <div class="card-body">
 
-                    {{-- Alert --}}
-                    @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
-                            <button type="button" class="close" data-dismiss="alert">
-                                <span>&times;</span>
-                            </button>
-                        </div>
-                    @endif
-
                     {{-- Filter Status --}}
                     <div class="mb-3">
                         <span class="text-muted small mr-2">Filter:</span>
@@ -85,8 +75,7 @@
                                         <td><span
                                                 class="badge badge-light">{{ $item->pendaftaran->no_pendaftaran ?? '-' }}</span>
                                         </td>
-                                        <td><span
-                                                class="badge badge-{{ $jenisBadge }}">{{ ucfirst($item->jenis) }}</span>
+                                        <td><span class="badge badge-{{ $jenisBadge }}">{{ ucfirst($item->jenis) }}</span>
                                         </td>
                                         <td>{{ ucfirst($item->metode_bayar) }}</td>
                                         <td>Rp {{ number_format($item->jumlah_bayar, 0, ',', '.') }}</td>

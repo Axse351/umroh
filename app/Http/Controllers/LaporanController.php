@@ -95,7 +95,7 @@ class LaporanController extends Controller
             ->whereYear('tanggal_berangkat', $tahun)
             ->latest('tanggal_berangkat')->get();
 
-        return view('laporan.keberangkatan', compact('keberangkatans', 'tahun'));
+        return view('admin.laporan.keberangkatan', compact('keberangkatans', 'tahun'));
     }
 
     public function destroy(Laporan $laporan)
