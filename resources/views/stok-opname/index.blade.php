@@ -11,13 +11,13 @@
                 <div class="card-header">
                     <h4><i class="fas fa-clipboard-check mr-1"></i> Data Stok Opname</h4>
                     <div class="card-header-action">
-                        <a href="{{ route('stok-opname.create') }}" class="btn btn-primary">
+                        <a href="{{ route('admin.stok-opname.create') }}" class="btn btn-primary">
                             <i class="fas fa-plus mr-1"></i> Catat Opname
                         </a>
                     </div>
                 </div>
 
-                <div class="card-body p-0">
+                <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead>
@@ -61,11 +61,11 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('stok-opname.show', $item) }}"
+                                            <a href="{{ route('admin.stok-opname.show', $item) }}"
                                                 class="btn btn-sm btn-info btn-icon" title="Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <form action="{{ route('stok-opname.destroy', $item) }}" method="POST"
+                                            <form action="{{ route('admin.stok-opname.destroy', $item) }}" method="POST"
                                                 class="d-inline"
                                                 onsubmit="return confirm('Yakin hapus data stok opname ini?')">
                                                 @csrf @method('DELETE')
