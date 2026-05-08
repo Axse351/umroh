@@ -2,7 +2,7 @@
 @section('title', 'Edit Akses')
 @section('page-title', 'Edit Akses System')
 @section('breadcrumb')
-    <div class="breadcrumb-item"><a href="{{ route('akses-system.index') }}">Akses System</a></div>
+    <div class="breadcrumb-item"><a href="{{ route('admin.akses-system.index') }}">Akses System</a></div>
     <div class="breadcrumb-item active">Edit</div>
 @endsection
 @section('content')
@@ -13,7 +13,7 @@
                     <h4>Form Edit Akses</h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('akses-system.update', $aksesSystem) }}" method="POST">
+                    <form action="{{ route('admin.akses-system.update', $aksesSystem) }}" method="POST">
                         @csrf @method('PUT')
                         <div class="form-group">
                             <label>Karyawan</label>
@@ -32,7 +32,8 @@
                                     <select name="role" class="form-control">
                                         @foreach (['superadmin', 'admin', 'kasir', 'marketing', 'gudang', 'viewer'] as $r)
                                             <option value="{{ $r }}"
-                                                {{ old('role', $aksesSystem->role) == $r ? 'selected' : '' }}>{{ ucfirst($r) }}
+                                                {{ old('role', $aksesSystem->role) == $r ? 'selected' : '' }}>
+                                                {{ ucfirst($r) }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -46,7 +47,8 @@
                                             {{ old('status', $aksesSystem->status) == 'aktif' ? 'selected' : '' }}>Aktif
                                         </option>
                                         <option value="nonaktif"
-                                            {{ old('status', $aksesSystem->status) == 'nonaktif' ? 'selected' : '' }}>Nonaktif
+                                            {{ old('status', $aksesSystem->status) == 'nonaktif' ? 'selected' : '' }}>
+                                            Nonaktif
                                         </option>
                                     </select>
                                 </div>
@@ -73,7 +75,7 @@
                         </div>
                         <div class="form-group mt-2">
                             <button type="submit" class="btn btn-warning"><i class="fas fa-save mr-1"></i> Update</button>
-                            <a href="{{ route('akses-system.index') }}" class="btn btn-secondary ml-2"><i
+                            <a href="{{ route('admin.akses-system.index') }}" class="btn btn-secondary ml-2"><i
                                     class="fas fa-arrow-left mr-1"></i> Kembali</a>
                         </div>
                     </form>

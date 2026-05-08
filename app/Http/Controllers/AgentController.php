@@ -39,7 +39,7 @@ class AgentController extends Controller
         $data['kode_agent'] = 'AGT-' . strtoupper(uniqid());
 
         Agent::create($data);
-        return redirect()->route('agent.index')->with('success', 'Data agent berhasil ditambahkan.');
+        return redirect()->route('admin.agent.index')->with('success', 'Data agent berhasil ditambahkan.');
     }
 
     public function show(Agent $agent)
@@ -69,12 +69,12 @@ class AgentController extends Controller
         ]);
 
         $agent->update($request->all());
-        return redirect()->route('agent.index')->with('success', 'Data agent berhasil diperbarui.');
+        return redirect()->route('admin.agent.index')->with('success', 'Data agent berhasil diperbarui.');
     }
 
     public function destroy(Agent $agent)
     {
         $agent->delete();
-        return redirect()->route('agent.index')->with('success', 'Data agent berhasil dihapus.');
+        return redirect()->route('admin.agent.index')->with('success', 'Data agent berhasil dihapus.');
     }
 }

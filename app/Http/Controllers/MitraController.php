@@ -37,7 +37,7 @@ class MitraController extends Controller
         $data['kode_mitra'] = 'MTR-' . strtoupper(uniqid());
 
         Mitra::create($data);
-        return redirect()->route('mitra.index')->with('success', 'Data mitra berhasil ditambahkan.');
+        return redirect()->route('admin.mitra.index')->with('success', 'Data mitra berhasil ditambahkan.');
     }
 
     public function show(Mitra $mitra)
@@ -64,12 +64,12 @@ class MitraController extends Controller
         ]);
 
         $mitra->update($request->all());
-        return redirect()->route('mitra.index')->with('success', 'Data mitra berhasil diperbarui.');
+        return redirect()->route('admin.mitra.index')->with('success', 'Data mitra berhasil diperbarui.');
     }
 
     public function destroy(Mitra $mitra)
     {
         $mitra->delete();
-        return redirect()->route('mitra.index')->with('success', 'Data mitra berhasil dihapus.');
+        return redirect()->route('admin.mitra.index')->with('success', 'Data mitra berhasil dihapus.');
     }
 }

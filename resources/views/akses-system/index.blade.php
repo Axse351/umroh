@@ -10,7 +10,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4>Manajemen Akses</h4>
-                    <a href="{{ route('akses-system.create') }}" class="btn btn-primary btn-sm"><i
+                    <a href="{{ route('admin.akses-system.create') }}" class="btn btn-primary btn-sm"><i
                             class="fas fa-plus mr-1"></i> Tambah User</a>
                 </div>
                 <div class="card-body">

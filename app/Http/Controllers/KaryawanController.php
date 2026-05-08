@@ -41,7 +41,7 @@ class KaryawanController extends Controller
         }
 
         Karyawan::create($data);
-        return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil ditambahkan.');
+        return redirect()->route('admin.karyawan.index')->with('success', 'Data karyawan berhasil ditambahkan.');
     }
 
     public function show(Karyawan $karyawan)
@@ -76,13 +76,13 @@ class KaryawanController extends Controller
         }
 
         $karyawan->update($data);
-        return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil diperbarui.');
+        return redirect()->route('admin.karyawan.index')->with('success', 'Data karyawan berhasil diperbarui.');
     }
 
     public function destroy(Karyawan $karyawan)
     {
         if ($karyawan->foto) Storage::disk('public')->delete($karyawan->foto);
         $karyawan->delete();
-        return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil dihapus.');
+        return redirect()->route('admin.karyawan.index')->with('success', 'Data karyawan berhasil dihapus.');
     }
 }

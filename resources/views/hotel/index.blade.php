@@ -38,7 +38,7 @@
                         </div>
                     </form>
                 </div>
-                <div class="card-body p-0">
+                <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead>
@@ -90,8 +90,8 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <a href="{{ route('admin.hotel.show', $item) }}" class="btn btn-sm btn-info btn-icon"
-                                                title="Detail">
+                                            <a href="{{ route('admin.hotel.show', $item) }}"
+                                                class="btn btn-sm btn-info btn-icon" title="Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <a href="{{ route('admin.hotel.edit', $item) }}"
