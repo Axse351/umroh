@@ -58,7 +58,6 @@ class PendaftaranController extends Controller
 
         $pendaftaran = Pendaftaran::create($data);
 
-        // Update slot terisi di keberangkatan
         $pendaftaran->keberangkatan->increment('terisi');
 
         return redirect()->route('admin.pendaftaran.show', $pendaftaran)
@@ -119,5 +118,28 @@ class PendaftaranController extends Controller
         ]);
         $pendaftaran->update(['status' => $request->status]);
         return back()->with('success', 'Status pendaftaran berhasil diperbarui.');
+    }
+
+    /**
+     * Cetak riwayat mutasi pembayaran pendaftaran.
+     */
+    public function cetakMutasi(Pendaftaran $pendaftaran)
+    {
+        $pendaftaran->load(
+            'jamaah',
+            'keberangkatan.paket',
+            'pembayarans'
+        );
+
+        /*
+         * Ambil semua pembayaran milik pendaftaran ini,
+         * urutkan dari yang terlama agar kronologi terlihat rapi.
+         */
+        $pembayarans = $pendaftaran->pembayarans()
+            ->orderBy('tanggal_bayar')
+            ->orderBy('created_at')
+            ->get();
+
+        return view('pendaftaran.cetak-mutasi', compact('pendaftaran', 'pembayarans'));
     }
 }

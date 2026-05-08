@@ -33,7 +33,7 @@ class PembayaranController extends Controller
             'pendaftaran_id' => 'required|exists:pendaftarans,id',
             'jumlah_bayar'   => 'required|numeric|min:1',
             'tanggal_bayar'  => 'required|date',
-            'metode_bayar'   => 'required|in:tunai,transfer,debit,kredit,qris',
+            'metode_bayar'   => 'required|in:tunai,transfer,debit,kredit,qris,tabungan', // ← tambah tabungan
             'bank_tujuan'    => 'nullable|string|max:100',
             'no_rekening'    => 'nullable|string|max:50',
             'nama_pengirim'  => 'nullable|string|max:255',
@@ -72,7 +72,7 @@ class PembayaranController extends Controller
         $request->validate([
             'jumlah_bayar'  => 'required|numeric|min:1',
             'tanggal_bayar' => 'required|date',
-            'metode_bayar'  => 'required|in:tunai,transfer,debit,kredit,qris',
+            'metode_bayar'  => 'required|in:tunai,transfer,debit,kredit,qris,tabungan', // ← tambah tabungan
             'jenis'         => 'required|in:dp,cicilan,pelunasan,lainnya',
             'status'        => 'required|in:pending,verifikasi,diterima,ditolak',
             'bukti_bayar'   => 'nullable|image|max:2048',
@@ -88,7 +88,6 @@ class PembayaranController extends Controller
 
         $pembayaran->update($data);
 
-        // Jika diterima & pelunasan, update status pendaftaran
         if ($data['status'] === 'diterima') {
             $pendaftaran = $pembayaran->pendaftaran;
             if ($pendaftaran->sisa_tagihan <= 0) {

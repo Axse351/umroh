@@ -13,7 +13,9 @@ class Pembayaran extends Model
         'no_pembayaran',
         'pendaftaran_id',
         'karyawan_id',
+        'tabungan_id',           // ← baru: sumber dari tabungan
         'jumlah_bayar',
+        'jumlah_dari_tabungan',  // ← baru: berapa yg ditarik dari tabungan
         'tanggal_bayar',
         'metode_bayar',
         'bank_tujuan',
@@ -22,12 +24,16 @@ class Pembayaran extends Model
         'bukti_bayar',
         'jenis',
         'status',
-        'catatan'
+        'catatan',
     ];
 
     protected $casts = [
-        'tanggal_bayar' => 'date',
+        'tanggal_bayar'          => 'date',
+        'jumlah_bayar'           => 'decimal:2',
+        'jumlah_dari_tabungan'   => 'decimal:2',
     ];
+
+    // ─── Relations ───────────────────────────────────────────────────
 
     public function pendaftaran()
     {
@@ -37,5 +43,20 @@ class Pembayaran extends Model
     public function karyawan()
     {
         return $this->belongsTo(Karyawan::class);
+    }
+
+    /**
+     * Tabungan yang dipakai sebagai sumber dana pembayaran ini (nullable).
+     */
+    public function tabungan()
+    {
+        return $this->belongsTo(Tabungan::class);
+    }
+
+    // ─── Accessors ───────────────────────────────────────────────────
+
+    public function getDariTabunganAttribute(): bool
+    {
+        return $this->tabungan_id !== null;
     }
 }

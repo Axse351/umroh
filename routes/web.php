@@ -28,7 +28,8 @@ use App\Http\Controllers\{
     SettingController,
     LaporanController,
     MutasiController,
-    PemasukanController
+    PemasukanController,
+    GunakanTabunganController
 };
 
 // Dashboard per role
@@ -129,6 +130,23 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('mutasi/{jamaah}/cetak', [MutasiController::class, 'cetak'])->name('mutasi.cetak');
         Route::get('tabungan/{tabungan}/cetak-mutasi', [TabunganController::class, 'cetakMutasi'])
             ->name('tabungan.cetak-mutasi');
+        Route::get('pendaftaran/{pendaftaran}/cetak-mutasi', [PendaftaranController::class, 'cetakMutasi'])
+            ->name('pendaftaran.cetak-mutasi');
+        Route::get(
+            'pendaftaran/{pendaftaran}/gunakan-tabungan',
+            [GunakanTabunganController::class, 'show']
+        )->name('pendaftaran.gunakan-tabungan');
+
+        Route::post(
+            'pendaftaran/{pendaftaran}/gunakan-tabungan',
+            [GunakanTabunganController::class, 'store']
+        )->name('pendaftaran.gunakan-tabungan.store');
+
+        // API endpoint untuk AJAX info saldo tabungan
+        Route::get(
+            'tabungan/{tabungan}/info',
+            [GunakanTabunganController::class, 'infoTabungan']
+        )->name('tabungan.info');
 
         Route::patch('pendaftaran/{pendaftaran}/status', [PendaftaranController::class, 'updateStatus'])
             ->name('pendaftaran.update-status');

@@ -18,13 +18,17 @@ class Tabungan extends Model
         'tanggal_buka',
         'tanggal_target',
         'status',
-        'catatan'
+        'catatan',
     ];
 
     protected $casts = [
-        'tanggal_buka'   => 'date',
-        'tanggal_target' => 'date',
+        'tanggal_buka'    => 'date',
+        'tanggal_target'  => 'date',
+        'target_tabungan' => 'decimal:2',
+        'saldo'           => 'decimal:2',
     ];
+
+    // ─── Relations ───────────────────────────────────────────────────
 
     public function jamaah()
     {
@@ -36,14 +40,32 @@ class Tabungan extends Model
         return $this->hasMany(Setoran::class);
     }
 
-    public function getSisaTargetAttribute()
+    /**
+     * Pembayaran pendaftaran yang menggunakan saldo tabungan ini.
+     */
+    public function pembayarans()
     {
-        return $this->target_tabungan - $this->saldo;
+        return $this->hasMany(Pembayaran::class);
     }
 
-    public function getPersentaseAttribute()
+    // ─── Accessors ───────────────────────────────────────────────────
+
+    /**
+     * Persentase ketercapaian target (0‑100).
+     */
+    public function getPersenTercapaiAttribute(): float
     {
-        if ($this->target_tabungan == 0) return 0;
-        return round(($this->saldo / $this->target_tabungan) * 100, 2);
+        if ($this->target_tabungan <= 0) {
+            return 0;
+        }
+        return min(100, round(($this->saldo / $this->target_tabungan) * 100, 1));
+    }
+
+    /**
+     * Sisa yang masih perlu ditabung.
+     */
+    public function getSisaTargetAttribute(): float
+    {
+        return max(0, $this->target_tabungan - $this->saldo);
     }
 }

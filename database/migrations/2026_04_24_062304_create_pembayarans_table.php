@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('karyawan_id')->nullable()->constrained('karyawans')->onDelete('set null'); // kasir
             $table->decimal('jumlah_bayar', 15, 2);
             $table->date('tanggal_bayar');
-            $table->enum('metode_bayar', ['tunai', 'transfer', 'debit', 'kredit', 'qris'])->default('transfer');
+            $table->enum('metode_bayar', ['tunai', 'transfer', 'debit', 'kredit', 'qris', 'tabungan'])->default('transfer');
             $table->string('bank_tujuan')->nullable();
             $table->string('no_rekening')->nullable();
             $table->string('nama_pengirim')->nullable();

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('jumlah_setor', 15, 2);
             $table->date('tanggal_setor');
             $table->enum('jenis', ['setor', 'tarik'])->default('setor');
-            $table->enum('metode', ['tunai', 'transfer', 'debit', 'qris'])->default('tunai');
+            $table->enum('metode', ['tunai', 'transfer', 'debit', 'kredit', 'qris', 'tabungan'])->default('tunai');
             $table->string('bukti_setor')->nullable();
             $table->enum('status', ['pending', 'diterima', 'ditolak'])->default('diterima');
             $table->text('catatan')->nullable();
