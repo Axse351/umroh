@@ -7,7 +7,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -17,6 +16,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'jamaah_id', // ← tambah ini
     ];
 
     protected $hidden = [
@@ -26,30 +26,26 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'password'          => 'hashed',
     ];
 
-    // Helper methods untuk cek role
-    public function isAdmin(): bool
+    // ─── Relasi ──────────────────────────────────────────────────────────────
+
+    public function jamaah()
     {
-        return $this->role === 'admin';
+        return $this->belongsTo(Jamaah::class);
     }
 
-    public function isKasir(): bool
-    {
-        return $this->role === 'kasir';
-    }
+    // ─── Role helpers ─────────────────────────────────────────────────────────
 
-    public function isUser(): bool
-    {
-        return $this->role === 'user';
-    }
+    public function isAdmin(): bool  { return $this->role === 'admin'; }
+    public function isKasir(): bool  { return $this->role === 'kasir'; }
+    public function isUser(): bool   { return $this->role === 'user'; }
 
     public function hasRole(string|array $roles): bool
     {
-        if (is_array($roles)) {
-            return in_array($this->role, $roles);
-        }
-        return $this->role === $roles;
+        return is_array($roles)
+            ? in_array($this->role, $roles)
+            : $this->role === $roles;
     }
 }

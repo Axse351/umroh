@@ -51,7 +51,7 @@ class PengeluaranController extends Controller
         }
 
         Pengeluaran::create($data);
-        return redirect()->route('pengeluaran.index')->with('success', 'Data pengeluaran berhasil ditambahkan.');
+        return redirect()->route('admin.pengeluaran.index')->with('success', 'Data pengeluaran berhasil ditambahkan.');
     }
 
     public function show(Pengeluaran $pengeluaran)
@@ -84,13 +84,13 @@ class PengeluaranController extends Controller
         }
 
         $pengeluaran->update($data);
-        return redirect()->route('pengeluaran.index')->with('success', 'Data pengeluaran berhasil diperbarui.');
+        return redirect()->route('admin.pengeluaran.index')->with('success', 'Data pengeluaran berhasil diperbarui.');
     }
 
     public function destroy(Pengeluaran $pengeluaran)
     {
         if ($pengeluaran->bukti) Storage::disk('public')->delete($pengeluaran->bukti);
         $pengeluaran->delete();
-        return redirect()->route('pengeluaran.index')->with('success', 'Data pengeluaran berhasil dihapus.');
+        return redirect()->route('admin.pengeluaran.index')->with('success', 'Data pengeluaran berhasil dihapus.');
     }
 }

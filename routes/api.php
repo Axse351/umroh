@@ -44,9 +44,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/pendaftaran',              [PendaftaranApiController::class, 'index']);
         Route::get('/pendaftaran/{pendaftaran}', [PendaftaranApiController::class, 'show']);
 
-        // Pembayaran
-        Route::get('/pembayaran',           [PembayaranApiController::class, 'index']);
-        Route::get('/pembayaran/{pembayaran}', [PembayaranApiController::class, 'show']);
-        Route::post('/pembayaran',          [PembayaranApiController::class, 'store']);
+// Pembayaran
+Route::get('/pembayaran',                 [PembayaranApiController::class, 'index']);
+Route::get('/pembayaran/summary',         [PembayaranApiController::class, 'summary']); // ← NAIK ke sini
+Route::get('/pembayaran/{pembayaran}',    [PembayaranApiController::class, 'show']);     // ← setelah summary
+Route::post('/pembayaran',               [PembayaranApiController::class, 'store']);
     });
 });

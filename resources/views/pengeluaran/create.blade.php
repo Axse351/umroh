@@ -2,7 +2,7 @@
 @section('title', 'Tambah Pengeluaran')
 @section('page-title', 'Pengeluaran')
 @section('breadcrumb')
-    <div class="breadcrumb-item"><a href="{{ route('pengeluaran.index') }}">Data Pengeluaran</a></div>
+    <div class="breadcrumb-item"><a href="{{ route('admin.pengeluaran.index') }}">Data Pengeluaran</a></div>
     <div class="breadcrumb-item active">Tambah</div>
 @endsection
 @section('content')
@@ -13,7 +13,7 @@
                     <h4>Form Tambah Pengeluaran</h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('pengeluaran.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.pengeluaran.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="form-group">
                             <label>Keperluan <span class="text-danger">*</span></label>
@@ -86,7 +86,7 @@
                         </div>
                         <div class="form-group mt-3">
                             <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Simpan</button>
-                            <a href="{{ route('pengeluaran.index') }}" class="btn btn-secondary ml-2"><i
+                            <a href="{{ route('admin.pengeluaran.index') }}" class="btn btn-secondary ml-2"><i
                                     class="fas fa-arrow-left mr-1"></i> Kembali</a>
                         </div>
                     </form>

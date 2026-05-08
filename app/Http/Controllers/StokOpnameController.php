@@ -49,7 +49,7 @@ class StokOpnameController extends Controller
         // Sesuaikan stok produk dengan hasil fisik
         $produk->update(['stok' => $stok_fisik]);
 
-        return redirect()->route('stok-opname.index')->with('success', 'Stok opname berhasil dicatat dan stok diperbarui.');
+        return redirect()->route('admin.stok-opname.index')->with('success', 'Stok opname berhasil dicatat dan stok diperbarui.');
     }
 
     public function show(StokOpname $stokOpname)
@@ -61,6 +61,6 @@ class StokOpnameController extends Controller
     public function destroy(StokOpname $stokOpname)
     {
         $stokOpname->delete();
-        return redirect()->route('stok-opname.index')->with('success', 'Data stok opname berhasil dihapus.');
+        return redirect()->route('admin.stok-opname.index')->with('success', 'Data stok opname berhasil dihapus.');
     }
 }

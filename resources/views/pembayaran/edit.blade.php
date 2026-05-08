@@ -7,7 +7,7 @@
 
         {{-- Header --}}
         <div class="d-flex align-items-center gap-3 mb-4">
-            <a href="{{ route('pembayaran.index') }}" class="btn btn-sm btn-outline-secondary">
+            <a href="{{ route('admin.pembayaran.index') }}" class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i>
             </a>
             <div>
@@ -16,7 +16,7 @@
             </div>
         </div>
 
-        <form action="{{ route('pembayaran.update', $pembayaran) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.pembayaran.update', $pembayaran) }}" method="POST" enctype="multipart/form-data">
             @csrf @method('PUT')
 
             <div class="row g-4">
@@ -236,7 +236,7 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save me-1"></i> Simpan Perubahan
                         </button>
-                        <a href="{{ route('pembayaran.index') }}" class="btn btn-outline-secondary">
+                        <a href="{{ route('admin.pembayaran.index') }}" class="btn btn-outline-secondary">
                             Batal
                         </a>
                     </div>

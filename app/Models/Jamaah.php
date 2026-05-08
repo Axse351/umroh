@@ -36,7 +36,7 @@ class Jamaah extends Model
         'foto',
         'foto_passport',
         'foto_ktp',
-        'status'
+        'status',
     ];
 
     protected $casts = [
@@ -44,22 +44,20 @@ class Jamaah extends Model
         'exp_passport'  => 'date',
     ];
 
-    public function pendaftarans()
+    // ─── Relasi ──────────────────────────────────────────────────────────────
+
+    public function user()
     {
-        return $this->hasMany(Pendaftaran::class);
+        return $this->hasOne(User::class);
     }
 
-    public function tabungans()
-    {
-        return $this->hasMany(Tabungan::class);
-    }
+    public function pendaftarans() { return $this->hasMany(Pendaftaran::class); }
+    public function tabungans()    { return $this->hasMany(Tabungan::class); }
+    public function dokumens()     { return $this->hasMany(Dokumen::class); }
 
-    public function dokumens()
-    {
-        return $this->hasMany(Dokumen::class);
-    }
+    // ─── Accessor ─────────────────────────────────────────────────────────────
 
-    public function getUmurAttribute()
+    public function getUmurAttribute(): int
     {
         return $this->tanggal_lahir->age;
     }

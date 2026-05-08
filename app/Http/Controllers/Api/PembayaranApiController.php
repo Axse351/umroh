@@ -132,4 +132,31 @@ class PembayaranApiController extends Controller
             'created_at'     => $p->created_at?->toDateTimeString(),
         ];
     }
+
+    /**
+ * Ringkasan total pembayaran user (uang masuk).
+ */
+public function summary(Request $request)
+{
+    $user = $request->user();
+
+    $query = Pembayaran::whereHas('pendaftaran', function ($q) use ($user) {
+        if (isset($user->jamaah_id)) {
+            $q->where('jamaah_id', $user->jamaah_id);
+        }
+    });
+
+    $totalMasuk     = (clone $query)->where('status', 'diterima')->sum('jumlah_bayar');
+    $totalPending   = (clone $query)->where('status', 'pending')->sum('jumlah_bayar');
+    $jumlahTransaksi = (clone $query)->where('status', 'diterima')->count();
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'total_masuk'      => $totalMasuk,
+            'total_pending'    => $totalPending,
+            'jumlah_transaksi' => $jumlahTransaksi,
+        ],
+    ]);
+}
 }

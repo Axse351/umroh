@@ -50,7 +50,7 @@ class PengeluaranProdukController extends Controller
         PengeluaranProduk::create($data);
         $produk->decrement('stok', $request->qty);
 
-        return redirect()->route('pengeluaran-produk.index')->with('success', 'Pengeluaran produk berhasil dicatat.');
+        return redirect()->route('admin.pengeluaran-produk.index')->with('success', 'Pengeluaran produk berhasil dicatat.');
     }
 
     public function show(PengeluaranProduk $pengeluaranProduk)
@@ -74,7 +74,7 @@ class PengeluaranProdukController extends Controller
         ]);
 
         $pengeluaranProduk->update($request->only('keperluan', 'keterangan'));
-        return redirect()->route('pengeluaran-produk.index')->with('success', 'Data pengeluaran produk berhasil diperbarui.');
+        return redirect()->route('admin.pengeluaran-produk.index')->with('success', 'Data pengeluaran produk berhasil diperbarui.');
     }
 
     public function destroy(PengeluaranProduk $pengeluaranProduk)
@@ -82,6 +82,6 @@ class PengeluaranProdukController extends Controller
         // Rollback stok
         $pengeluaranProduk->produk->increment('stok', $pengeluaranProduk->qty);
         $pengeluaranProduk->delete();
-        return redirect()->route('pengeluaran-produk.index')->with('success', 'Data pengeluaran produk berhasil dihapus.');
+        return redirect()->route('admin.pengeluaran-produk.index')->with('success', 'Data pengeluaran produk berhasil dihapus.');
     }
 }
