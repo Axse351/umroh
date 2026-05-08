@@ -60,6 +60,10 @@
                         <a href="{{ route('admin.tabungan.index') }}" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
+                        <a href="{{ route('admin.tabungan.cetak-mutasi', $tabungan) }}" target="_blank"
+                            class="btn btn-primary btn-sm">
+                            <i class="fas fa-print mr-1"></i> Cetak Mutasi
+                        </a>
                     </div>
                 </div>
             </div>

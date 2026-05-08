@@ -11,6 +11,39 @@
     <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap-social/bootstrap-social.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
+
+    <style>
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper .form-control {
+            padding-right: 42px;
+        }
+
+        .password-wrapper .toggle-eye {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 16px;
+            z-index: 10;
+            line-height: 1;
+        }
+
+        .password-wrapper .toggle-eye:focus {
+            outline: none;
+        }
+
+        .password-wrapper .toggle-eye:hover {
+            color: #666;
+        }
+    </style>
 </head>
 
 <body>
@@ -22,7 +55,7 @@
                         class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
 
                         <div class="login-brand">
-                            <img src="{{ asset('assets/img/stisla-fill.svg') }}" alt="logo" width="100"
+                            <img src="{{ asset('assets/img/logo.png') }}" alt="logo" width="100"
                                 class="shadow-light rounded-circle">
                         </div>
 
@@ -76,11 +109,17 @@
                                         <div class="d-block">
                                             <label for="password" class="control-label">Password</label>
                                         </div>
-                                        <input id="password" type="password"
-                                            class="form-control @error('password') is-invalid @enderror" name="password"
-                                            required placeholder="Masukkan password Anda">
+                                        <div class="password-wrapper">
+                                            <input id="password" type="password"
+                                                class="form-control @error('password') is-invalid @enderror"
+                                                name="password" required placeholder="Masukkan password Anda">
+                                            <button type="button" class="toggle-eye" onclick="togglePassword()"
+                                                title="Tampilkan/sembunyikan password">
+                                                <i class="fas fa-eye" id="toggleIcon"></i>
+                                            </button>
+                                        </div>
                                         @error('password')
-                                            <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback" style="display:block;">{{ $message }}</div>
                                         @enderror
                                     </div>
 
@@ -103,7 +142,7 @@
                         </div>
 
                         <div class="simple-footer">
-                            Copyright &copy; Posyandu {{ date('Y') }}
+                            Copyright &copy; Genmim {{ date('Y') }}
                         </div>
 
                     </div>
@@ -121,6 +160,23 @@
     <script src="{{ asset('assets/js/stisla.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
+
+    <script>
+        function togglePassword() {
+            var input = document.getElementById('password');
+            var icon = document.getElementById('toggleIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+
 </body>
 
 </html>

@@ -68,6 +68,10 @@
                                                 @csrf @method('DELETE')
                                                 <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                                             </form>
+                                            <a href="{{ route('admin.tabungan.cetak-mutasi', $tabungan) }}" target="_blank"
+                                                class="btn btn-primary btn-sm">
+                                                <i class="fas fa-print mr-1"></i> Cetak Mutasi
+                                            </a>
                                         </td>
                                     </tr>
                                 @empty

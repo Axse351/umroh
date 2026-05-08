@@ -11,16 +11,22 @@ class TabunganController extends Controller
     public function index(Request $request)
     {
         $jenis = $request->jenis;
+
         $tabungans = Tabungan::with('jamaah')
-            ->when($jenis, fn($q) => $q->where('jenis', $jenis))
-            ->latest()->paginate(10);
+            ->when($jenis, function ($query) use ($jenis) {
+                $query->where('jenis', $jenis);
+            })
+            ->latest()
+            ->paginate(10);
+
         return view('tabungan.index', compact('tabungans', 'jenis'));
     }
 
     public function create(Request $request)
     {
         $jamaah = Jamaah::where('status', 'aktif')->get();
-        $jenis  = $request->jenis ?? 'umroh';
+        $jenis = $request->jenis ?? 'umroh';
+
         return view('tabungan.create', compact('jamaah', 'jenis'));
     }
 
@@ -36,23 +42,32 @@ class TabunganController extends Controller
         ]);
 
         $data = $request->all();
+
         $data['no_rekening_tabungan'] = 'TAB-' . strtoupper(uniqid());
-        $data['saldo']  = 0;
+        $data['saldo'] = 0;
         $data['status'] = 'aktif';
 
         Tabungan::create($data);
-        return redirect()->route('admin.tabungan.index')->with('success', 'Rekening tabungan berhasil dibuat.');
+
+        return redirect()
+            ->route('admin.tabungan.index')
+            ->with('success', 'Rekening tabungan berhasil dibuat.');
     }
 
     public function show(Tabungan $tabungan)
     {
-        $tabungan->load('jamaah', 'setorans');
+        $tabungan->load([
+            'jamaah',
+            'setorans.karyawan'
+        ]);
+
         return view('tabungan.show', compact('tabungan'));
     }
 
     public function edit(Tabungan $tabungan)
     {
         $jamaah = Jamaah::where('status', 'aktif')->get();
+
         return view('tabungan.edit', compact('tabungan', 'jamaah'));
     }
 
@@ -65,13 +80,37 @@ class TabunganController extends Controller
             'catatan'         => 'nullable|string',
         ]);
 
-        $tabungan->update($request->all());
-        return redirect()->route('admin.tabungan.index')->with('success', 'Data tabungan berhasil diperbarui.');
+        $tabungan->update([
+            'target_tabungan' => $request->target_tabungan,
+            'tanggal_target'  => $request->tanggal_target,
+            'status'          => $request->status,
+            'catatan'         => $request->catatan,
+        ]);
+
+        return redirect()
+            ->route('admin.tabungan.index')
+            ->with('success', 'Data tabungan berhasil diperbarui.');
+    }
+
+    public function cetakMutasi(Tabungan $tabungan)
+    {
+        $tabungan->load('jamaah');
+
+        // Ambil mutasi dari tabel setorans
+        $mutasis = $tabungan->setorans()
+            ->with('karyawan')
+            ->orderBy('tanggal_setor', 'asc')
+            ->get();
+
+        return view('tabungan.cetak-mutasi', compact('tabungan', 'mutasis'));
     }
 
     public function destroy(Tabungan $tabungan)
     {
         $tabungan->delete();
-        return redirect()->route('admin.tabungan.index')->with('success', 'Data tabungan berhasil dihapus.');
+
+        return redirect()
+            ->route('admin.tabungan.index')
+            ->with('success', 'Data tabungan berhasil dihapus.');
     }
 }

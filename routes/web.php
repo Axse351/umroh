@@ -27,6 +27,7 @@ use App\Http\Controllers\{
     AksesSystemController,
     SettingController,
     LaporanController,
+    MutasiController,
     PemasukanController
 };
 
@@ -126,10 +127,11 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('mutasi',                [MutasiController::class, 'index'])->name('mutasi.index');
         Route::get('mutasi/{jamaah}',       [MutasiController::class, 'show'])->name('mutasi.show');
         Route::get('mutasi/{jamaah}/cetak', [MutasiController::class, 'cetak'])->name('mutasi.cetak');
+        Route::get('tabungan/{tabungan}/cetak-mutasi', [TabunganController::class, 'cetakMutasi'])
+            ->name('tabungan.cetak-mutasi');
 
         Route::patch('pendaftaran/{pendaftaran}/status', [PendaftaranController::class, 'updateStatus'])
-         ->name('pendaftaran.update-status');
-
+            ->name('pendaftaran.update-status');
     });
 
 
