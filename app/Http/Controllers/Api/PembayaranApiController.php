@@ -6,18 +6,55 @@ use App\Http\Controllers\Controller;
 use App\Models\Pembayaran;
 use App\Models\Pendaftaran;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class PembayaranApiController extends Controller
 {
     /**
-     * Daftar pembayaran milik user yang login.
-     * Filter by status: pending, verifikasi, diterima, ditolak.
+     * Daftar pendaftaran + pembayarannya (mutasi).
+     * Endpoint ini untuk MutasiScreen — mengembalikan Pendaftaran.
      */
     public function index(Request $request)
     {
         $user   = $request->user();
+        $jenis  = $request->jenis;
         $status = $request->status;
+
+        $query = Pendaftaran::with('jamaah', 'keberangkatan.paket', 'pembayarans')
+            ->when($jenis,  fn($q) => $q->where('jenis',  $jenis))
+            ->when($status, fn($q) => $q->where('status', $status));
+
+        if (isset($user->jamaah_id)) {
+            $query->where('jamaah_id', $user->jamaah_id);
+        }
+
+        $pendaftarans = $query->latest()->paginate(10);
+
+        $data = $pendaftarans->getCollection()
+            ->map(fn($p) => $this->formatPendaftaran($p))
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'current_page' => $pendaftarans->currentPage(),
+                'last_page'    => $pendaftarans->lastPage(),
+                'per_page'     => $pendaftarans->perPage(),
+                'total'        => $pendaftarans->total(),
+                'data'         => $data,
+            ],
+        ]);
+    }
+
+    /**
+     * FIX: Endpoint baru khusus untuk Home Screen "Transaksi Terbaru".
+     * Mengembalikan Pembayaran flat (bukan Pendaftaran), 5 terbaru.
+     *
+     * Daftarkan di api.php SEBELUM /{pembayaran}:
+     *   Route::get('pembayaran/recent', [PembayaranApiController::class, 'recent']);
+     */
+    public function recent(Request $request)
+    {
+        $user = $request->user();
 
         $pembayarans = Pembayaran::with('pendaftaran.jamaah')
             ->whereHas('pendaftaran', function ($q) use ($user) {
@@ -25,29 +62,50 @@ class PembayaranApiController extends Controller
                     $q->where('jamaah_id', $user->jamaah_id);
                 }
             })
-            ->when($status, fn($q) => $q->where('status', $status))
             ->latest()
-            ->paginate(10);
+            ->limit(5)
+            ->get();
 
-        // ✅ Ganti through() dengan getCollection()->map()
-        $data = $pembayarans->getCollection()
-            ->map(fn($p) => $this->formatPembayaran($p))
-            ->values();
+        return response()->json([
+            'success' => true,
+            'data'    => $pembayarans->map(
+                fn($p) => $this->formatPembayaran($p)
+            )->values(),
+        ]);
+    }
+
+    /**
+     * Ringkasan total pembayaran user (uang masuk, pending, jumlah transaksi).
+     *
+     * FIX route: endpoint ini HARUS didaftarkan sebelum /{pembayaran} di api.php
+     * agar tidak tertangkap sebagai show(pembayaran="summary").
+     */
+    public function summary(Request $request)
+    {
+        $user = $request->user();
+
+        $query = Pembayaran::whereHas('pendaftaran', function ($q) use ($user) {
+            if (isset($user->jamaah_id)) {
+                $q->where('jamaah_id', $user->jamaah_id);
+            }
+        });
+
+        $totalMasuk      = (clone $query)->where('status', 'diterima')->sum('jumlah_bayar');
+        $totalPending    = (clone $query)->where('status', 'pending')->sum('jumlah_bayar');
+        $jumlahTransaksi = (clone $query)->count();
 
         return response()->json([
             'success' => true,
             'data' => [
-                'current_page' => $pembayarans->currentPage(),
-                'last_page'    => $pembayarans->lastPage(),
-                'per_page'     => $pembayarans->perPage(),
-                'total'        => $pembayarans->total(),
-                'data'         => $data,
+                'total_masuk'      => (float) $totalMasuk,
+                'total_pending'    => (float) $totalPending,
+                'jumlah_transaksi' => (int) $jumlahTransaksi,
             ],
         ]);
     }
 
     /**
-     * Detail pembayaran.
+     * Detail satu pembayaran.
      */
     public function show(Pembayaran $pembayaran)
     {
@@ -77,7 +135,6 @@ class PembayaranApiController extends Controller
             'catatan'        => 'nullable|string',
         ]);
 
-        // Pastikan pendaftaran milik user ini
         $user        = $request->user();
         $pendaftaran = Pendaftaran::find($request->pendaftaran_id);
 
@@ -90,7 +147,7 @@ class PembayaranApiController extends Controller
 
         $data                  = $request->except('bukti_bayar');
         $data['no_pembayaran'] = 'PAY-' . strtoupper(uniqid());
-        $data['karyawan_id']   = null; // user membuat sendiri
+        $data['karyawan_id']   = null;
         $data['status']        = 'pending';
 
         if ($request->hasFile('bukti_bayar')) {
@@ -106,57 +163,62 @@ class PembayaranApiController extends Controller
         ], 201);
     }
 
-    // ─── Helper ──────────────────────────────────────────────────────────────
+    // ─── Private Helpers ──────────────────────────────────────────────────────
 
-    private function formatPembayaran(Pembayaran $p): array
+    /**
+     * Format Pendaftaran untuk response index (mutasi).
+     */
+    private function formatPendaftaran(Pendaftaran $p): array
     {
+        $totalBayar  = $p->pembayarans->where('status', 'diterima')->sum('jumlah_bayar');
+        $sisaTagihan = max(0, $p->harga_jual - $totalBayar);
+
         return [
-            'id'             => $p->id,
-            'no_pembayaran'  => $p->no_pembayaran,
-            'jumlah_bayar'   => $p->jumlah_bayar,
-            'tanggal_bayar'  => $p->tanggal_bayar,
-            'metode_bayar'   => $p->metode_bayar,
-            'bank_tujuan'    => $p->bank_tujuan,
-            'no_rekening'    => $p->no_rekening,
-            'nama_pengirim'  => $p->nama_pengirim,
-            'jenis'          => $p->jenis,
-            'status'         => $p->status,
-            'catatan'        => $p->catatan,
-            'bukti_bayar'    => $p->bukti_bayar ? asset('storage/' . $p->bukti_bayar) : null,
-            'pendaftaran'    => $p->pendaftaran ? [
-                'id'           => $p->pendaftaran->id,
-                'jamaah'       => $p->pendaftaran->jamaah ? [
-                    'nama_lengkap' => $p->pendaftaran->jamaah->nama_lengkap,
-                ] : null,
-            ] : null,
-            'created_at'     => $p->created_at?->toDateTimeString(),
+            'id'                => $p->id,
+            'no_pendaftaran'    => $p->no_pendaftaran,
+            'jenis'             => $p->jenis,
+            'status'            => $p->status,
+            'harga_jual'        => (float) $p->harga_jual,
+            'total_bayar'       => (float) $totalBayar,
+            'sisa_tagihan'      => (float) $sisaTagihan,
+            'dp_minimal'        => (float) $p->dp_minimal,
+            'batas_pelunasan'   => $p->batas_pelunasan,
+            'nama_jamaah'       => $p->jamaah?->nama_lengkap,
+            'nama_paket'        => $p->keberangkatan?->paket?->nama_paket,
+            'tanggal_berangkat' => $p->keberangkatan?->tanggal_berangkat,
+            'pembayarans'       => $p->pembayarans
+                ->map(fn($bayar) => $this->formatPembayaran($bayar))
+                ->values(),
         ];
     }
 
     /**
- * Ringkasan total pembayaran user (uang masuk).
- */
-public function summary(Request $request)
-{
-    $user = $request->user();
-
-    $query = Pembayaran::whereHas('pendaftaran', function ($q) use ($user) {
-        if (isset($user->jamaah_id)) {
-            $q->where('jamaah_id', $user->jamaah_id);
-        }
-    });
-
-    $totalMasuk     = (clone $query)->where('status', 'diterima')->sum('jumlah_bayar');
-    $totalPending   = (clone $query)->where('status', 'pending')->sum('jumlah_bayar');
-    $jumlahTransaksi = (clone $query)->where('status', 'diterima')->count();
-
-    return response()->json([
-        'success' => true,
-        'data' => [
-            'total_masuk'      => $totalMasuk,
-            'total_pending'    => $totalPending,
-            'jumlah_transaksi' => $jumlahTransaksi,
-        ],
-    ]);
-}
+     * Format Pembayaran — dipakai di show / store / recent / nested di formatPendaftaran.
+     */
+    private function formatPembayaran(Pembayaran $p): array
+    {
+        return [
+            'id'            => $p->id,
+            'no_pembayaran' => $p->no_pembayaran,
+            'jumlah_bayar'  => (float) $p->jumlah_bayar,
+            'tanggal_bayar' => $p->tanggal_bayar,
+            'metode_bayar'  => $p->metode_bayar,
+            'bank_tujuan'   => $p->bank_tujuan,
+            'no_rekening'   => $p->no_rekening,
+            'nama_pengirim' => $p->nama_pengirim,
+            'jenis'         => $p->jenis,
+            'status'        => $p->status,
+            'catatan'       => $p->catatan,
+            'bukti_bayar'   => $p->bukti_bayar
+                ? asset('storage/' . $p->bukti_bayar)
+                : null,
+            'pendaftaran'   => $p->pendaftaran ? [
+                'id'     => $p->pendaftaran->id,
+                'jamaah' => $p->pendaftaran->jamaah ? [
+                    'nama_lengkap' => $p->pendaftaran->jamaah->nama_lengkap,
+                ] : null,
+            ] : null,
+            'created_at'    => $p->created_at?->toDateTimeString(),
+        ];
+    }
 }
