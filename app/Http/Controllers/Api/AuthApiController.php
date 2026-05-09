@@ -3,15 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pendaftaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AuthApiController extends Controller
 {
-    /**
-     * Login user dan kembalikan token Sanctum.
-     * Hanya role 'user' yang diizinkan login via API.
-     */
     public function login(Request $request)
     {
         $request->validate([
@@ -36,10 +33,12 @@ class AuthApiController extends Controller
             ], 403);
         }
 
-        // Hapus token lama agar tidak menumpuk
         $user->tokens()->delete();
-
         $token = $user->createToken('flutter-app')->plainTextToken;
+
+        $pendaftaran = Pendaftaran::where('jamaah_id', $user->jamaah_id)
+            ->latest()
+            ->first();
 
         return response()->json([
             'success' => true,
@@ -47,18 +46,18 @@ class AuthApiController extends Controller
             'data'    => [
                 'token' => $token,
                 'user'  => [
-                    'id'    => $user->id,
-                    'name'  => $user->name,
-                    'email' => $user->email,
-                    'role'  => $user->role,
+                    'id'               => $user->id,
+                    'name'             => $user->name,
+                    'email'            => $user->email,
+                    'role'             => $user->role,
+                    'jamaah_id'        => $user->jamaah_id,
+                    'saving_type'      => $pendaftaran?->jenis,
+                    'registered_date'  => $pendaftaran?->tanggal_daftar?->toDateString(),
                 ],
             ],
         ]);
     }
 
-    /**
-     * Logout: hapus token aktif.
-     */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -69,20 +68,24 @@ class AuthApiController extends Controller
         ]);
     }
 
-    /**
-     * Profil user yang sedang login.
-     */
     public function profile(Request $request)
     {
-        $user = $request->user()->load('karyawan'); // load relasi jika ada
+        $user = $request->user();
+
+        $pendaftaran = Pendaftaran::where('jamaah_id', $user->jamaah_id)
+            ->latest()
+            ->first();
 
         return response()->json([
             'success' => true,
             'data'    => [
-                'id'    => $user->id,
-                'name'  => $user->name,
-                'email' => $user->email,
-                'role'  => $user->role,
+                'id'               => $user->id,
+                'name'             => $user->name,
+                'email'            => $user->email,
+                'role'             => $user->role,
+                'jamaah_id'        => $user->jamaah_id,
+                'saving_type'      => $pendaftaran?->jenis,
+                'registered_date'  => $pendaftaran?->tanggal_daftar?->toDateString(),
             ],
         ]);
     }

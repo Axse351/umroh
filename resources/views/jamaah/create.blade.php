@@ -202,7 +202,7 @@
                             @foreach ([['foto', 'Foto Wajah'], ['foto_ktp', 'Foto KTP'], ['foto_passport', 'Foto Passport']] as [$field, $label])
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>{{ $label }}</label>
+                                        <label>{{ $label }} <small class="text-muted">(maks. 2MB)</small></label>
                                         <div class="custom-file">
                                             <input type="file" name="{{ $field }}" class="custom-file-input"
                                                 id="{{ $field }}" accept="image/*"
@@ -210,6 +210,8 @@
                                             <label class="custom-file-label" for="{{ $field }}">Pilih
                                                 file...</label>
                                         </div>
+                                        <small id="err-{{ $field }}" class="text-danger d-none">Ukuran file
+                                            melebihi 2MB.</small>
                                         <img id="prev-{{ $field }}" src="#"
                                             class="img-thumbnail d-none mt-2" style="max-height:100px">
                                     </div>
@@ -230,8 +232,26 @@
 @endsection
 @push('scripts')
     <script>
+        const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+        const photoFields = ['foto', 'foto_ktp', 'foto_passport'];
+
         function previewImage(input, previewId) {
+            const errEl = document.getElementById('err-' + input.name);
+
             if (input.files && input.files[0]) {
+                if (input.files[0].size > MAX_SIZE) {
+                    // Tolak file — tampilkan error, reset input
+                    errEl.classList.remove('d-none');
+                    input.value = '';
+                    input.nextElementSibling.textContent = 'Pilih file...';
+                    const img = document.getElementById(previewId);
+                    img.src = '#';
+                    img.classList.add('d-none');
+                    return;
+                }
+
+                errEl.classList.add('d-none');
+
                 const reader = new FileReader();
                 reader.onload = e => {
                     const img = document.getElementById(previewId);
@@ -242,5 +262,30 @@
                 input.nextElementSibling.textContent = input.files[0].name;
             }
         }
+
+        // Double-check saat submit (jaga-jaga jika validasi sisi kiri terlewat)
+        document.querySelector('form').addEventListener('submit', function(e) {
+            let blocked = false;
+
+            photoFields.forEach(function(field) {
+                const input = document.getElementById(field);
+                const errEl = document.getElementById('err-' + field);
+
+                if (input.files && input.files[0] && input.files[0].size > MAX_SIZE) {
+                    errEl.classList.remove('d-none');
+                    blocked = true;
+                }
+            });
+
+            if (blocked) {
+                e.preventDefault();
+                // Scroll ke field foto pertama yang error
+                const firstErr = document.querySelector('.text-danger:not(.d-none)[id^="err-"]');
+                if (firstErr) firstErr.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        });
     </script>
 @endpush

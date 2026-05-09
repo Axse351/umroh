@@ -6,13 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Pembayaran;
 use App\Models\Pendaftaran;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class PembayaranApiController extends Controller
 {
     /**
-     * Daftar pembayaran milik user yang login.
-     * Filter by status: pending, verifikasi, diterima, ditolak.
+     * Daftar pendaftaran + pembayarannya (mutasi)
      */
     public function index(Request $request)
     {
@@ -30,7 +29,6 @@ class PembayaranApiController extends Controller
 
         $pendaftarans = $query->latest()->paginate(10);
 
-        // ✅ Ganti through() dengan getCollection()->map()
         $data = $pendaftarans->getCollection()
             ->map(fn($p) => $this->formatPendaftaran($p))
             ->values();
@@ -43,6 +41,34 @@ class PembayaranApiController extends Controller
                 'per_page'     => $pendaftarans->perPage(),
                 'total'        => $pendaftarans->total(),
                 'data'         => $data,
+            ],
+        ]);
+    }
+
+    /**
+     * SUMMARY: total masuk, pending, jumlah transaksi
+     */
+    public function summary(Request $request)
+    {
+        $user = $request->user();
+
+        // Ambil semua pembayaran milik user (via pendaftaran)
+        $query = Pembayaran::whereHas('pendaftaran', function ($q) use ($user) {
+            if (isset($user->jamaah_id)) {
+                $q->where('jamaah_id', $user->jamaah_id);
+            }
+        });
+
+        $totalMasuk = (clone $query)->where('status', 'diterima')->sum('jumlah_bayar');
+        $totalPending = (clone $query)->where('status', 'pending')->sum('jumlah_bayar');
+        $jumlahTransaksi = (clone $query)->count();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_masuk'       => (float) $totalMasuk,
+                'total_pending'     => (float) $totalPending,
+                'jumlah_transaksi'  => (int) $jumlahTransaksi,
             ],
         ]);
     }
@@ -61,7 +87,7 @@ class PembayaranApiController extends Controller
     }
 
     /**
-     * Buat pembayaran baru (user upload bukti bayar).
+     * Buat pembayaran baru (user upload bukti bayar)
      */
     public function store(Request $request)
     {
@@ -78,7 +104,6 @@ class PembayaranApiController extends Controller
             'catatan'        => 'nullable|string',
         ]);
 
-        // Pastikan pendaftaran milik user ini
         $user        = $request->user();
         $pendaftaran = Pendaftaran::find($request->pendaftaran_id);
 
@@ -91,7 +116,7 @@ class PembayaranApiController extends Controller
 
         $data                  = $request->except('bukti_bayar');
         $data['no_pembayaran'] = 'PAY-' . strtoupper(uniqid());
-        $data['karyawan_id']   = null; // user membuat sendiri
+        $data['karyawan_id']   = null;
         $data['status']        = 'pending';
 
         if ($request->hasFile('bukti_bayar')) {
@@ -107,14 +132,43 @@ class PembayaranApiController extends Controller
         ], 201);
     }
 
-    // ─── Helper ──────────────────────────────────────────────────────────────
+    // ─── PRIVATE HELPERS ───────────────────────────────────────────────────
 
+    /**
+     * Format data pendaftaran untuk mutasi (digunakan di index)
+     */
+    private function formatPendaftaran(Pendaftaran $p): array
+    {
+        // Hitung total bayar dari pembayaran yang sudah diterima
+        $totalBayar = $p->pembayarans->where('status', 'diterima')->sum('jumlah_bayar');
+        $sisaTagihan = max(0, $p->harga_jual - $totalBayar);
+
+        return [
+            'id'                 => $p->id,
+            'no_pendaftaran'     => $p->no_pendaftaran,
+            'jenis'              => $p->jenis,
+            'status'             => $p->status,
+            'harga_jual'         => (float) $p->harga_jual,
+            'total_bayar'        => (float) $totalBayar,
+            'sisa_tagihan'       => (float) $sisaTagihan,
+            'dp_minimal'         => (float) $p->dp_minimal,
+            'batas_pelunasan'    => $p->batas_pelunasan,
+            'nama_jamaah'        => $p->jamaah?->nama_lengkap,
+            'nama_paket'         => $p->keberangkatan?->paket?->nama_paket,
+            'tanggal_berangkat'  => $p->keberangkatan?->tanggal_berangkat,
+            'pembayarans'        => $p->pembayarans->map(fn($bayar) => $this->formatPembayaran($bayar))->values(),
+        ];
+    }
+
+    /**
+     * Format data pembayaran (digunakan di show dan di dalam formatPendaftaran)
+     */
     private function formatPembayaran(Pembayaran $p): array
     {
         return [
             'id'             => $p->id,
             'no_pembayaran'  => $p->no_pembayaran,
-            'jumlah_bayar'   => $p->jumlah_bayar,
+            'jumlah_bayar'   => (float) $p->jumlah_bayar,
             'tanggal_bayar'  => $p->tanggal_bayar,
             'metode_bayar'   => $p->metode_bayar,
             'bank_tujuan'    => $p->bank_tujuan,
