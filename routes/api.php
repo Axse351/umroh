@@ -7,18 +7,21 @@ use App\Http\Controllers\Api\KeberangkatanApiController;
 use App\Http\Controllers\Api\PembayaranApiController;
 use App\Http\Controllers\Api\PendaftaranApiController;
 use App\Http\Controllers\Api\SavingAccountApiController;
+use App\Http\Controllers\Api\KolektorApiController; // ← tambah ini
 
 Route::prefix('v1')->group(function () {
 
+    // ── Public ────────────────────────────────────────────────
     Route::post('/login', [AuthApiController::class, 'login']);
 
     Route::get('/keberangkatan',                 [KeberangkatanApiController::class, 'index']);
     Route::get('/keberangkatan/{keberangkatan}', [KeberangkatanApiController::class, 'show']);
 
+    // ── User ──────────────────────────────────────────────────
     Route::middleware(['auth:sanctum', 'api.role:user'])->group(function () {
 
-        Route::post('/logout', [AuthApiController::class, 'logout']);
-        Route::get('/profile', [AuthApiController::class, 'profile']);
+        Route::post('/logout',  [AuthApiController::class, 'logout']);
+        Route::get('/profile',  [AuthApiController::class, 'profile']);
 
         Route::get('/saving-account', [SavingAccountApiController::class, 'show']);
 
@@ -26,13 +29,41 @@ Route::prefix('v1')->group(function () {
         Route::get('/jamaah/{jamaah}', [JamaahApiController::class, 'show']);
         Route::put('/jamaah/{jamaah}', [JamaahApiController::class, 'update']);
 
-        Route::get('/pendaftaran',              [PendaftaranApiController::class, 'index']);
+        Route::get('/pendaftaran',               [PendaftaranApiController::class, 'index']);
         Route::get('/pendaftaran/{pendaftaran}', [PendaftaranApiController::class, 'show']);
 
-        Route::get('pembayaran/recent',  [PembayaranApiController::class, 'recent']);
-        Route::get('/pembayaran/summary',      [PembayaranApiController::class, 'summary']);
-        Route::get('/pembayaran',              [PembayaranApiController::class, 'index']);
-        Route::get('/pembayaran/{pembayaran}', [PembayaranApiController::class, 'show']);
-        Route::post('/pembayaran',             [PembayaranApiController::class, 'store']);
+        // PENTING: route spesifik (recent, summary) harus SEBELUM /{pembayaran}
+        Route::get('/pembayaran/recent',          [PembayaranApiController::class, 'recent']);
+        Route::get('/pembayaran/summary',         [PembayaranApiController::class, 'summary']);
+        Route::get('/pembayaran',                 [PembayaranApiController::class, 'index']);
+        Route::get('/pembayaran/{pembayaran}',    [PembayaranApiController::class, 'show']);
+        Route::post('/pembayaran',                [PembayaranApiController::class, 'store']);
     });
+
+    // ── Kolektor ──────────────────────────────────────────────
+    Route::middleware(['auth:sanctum', 'api.role:kolektor']) // ← pakai api.role, bukan role.api
+        ->prefix('kolektor')
+        ->group(function () {
+
+            // Logout & profile (shared, tidak perlu duplikat controller)
+            Route::post('/logout',  [AuthApiController::class, 'logout']);
+            Route::get('/profile',  [AuthApiController::class, 'profile']);
+
+            // Jamaah
+            Route::get('/jamaah',              [KolektorApiController::class, 'jamaahIndex']);
+            Route::get('/jamaah/{jamaah}',     [KolektorApiController::class, 'jamaahShow']);
+            Route::post('/jamaah',             [KolektorApiController::class, 'jamaahStore']);
+
+            // Keberangkatan (picker untuk form pendaftaran)
+            Route::get('/keberangkatan',       [KolektorApiController::class, 'keberangkatanList']);
+
+            // Pendaftaran
+            Route::get('/pendaftaran',              [KolektorApiController::class, 'pendaftaranIndex']);
+            Route::post('/pendaftaran',             [KolektorApiController::class, 'pendaftaranStore']);
+
+            // Pembayaran
+            Route::get('/pembayaran',          [KolektorApiController::class, 'pembayaranIndex']);
+            Route::post('/pembayaran',         [KolektorApiController::class, 'pembayaranStore']);
+        });
+
 });

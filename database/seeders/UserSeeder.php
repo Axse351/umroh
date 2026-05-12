@@ -33,5 +33,12 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'role'     => 'user',
         ]);
+        // Kolektor
+           User::create([
+            'name'     => 'Kolektor Lapangan',
+            'email'    => 'kolektor@umroh.com',
+            'password' => Hash::make('password'),
+            'role'     => 'kolektor',
+        ]);
     }
 }

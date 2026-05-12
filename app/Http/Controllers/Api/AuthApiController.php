@@ -25,20 +25,24 @@ class AuthApiController extends Controller
 
         $user = Auth::user();
 
-        if ($user->role !== 'user') {
+        // Izinkan 'user' dan 'kolektor'
+        if (!in_array($user->role, ['user', 'kolektor'])) {
             Auth::logout();
             return response()->json([
                 'success' => false,
-                'message' => 'Akses ditolak. Hanya akun user yang dapat login via aplikasi.',
+                'message' => 'Akses ditolak.',
             ], 403);
         }
 
         $user->tokens()->delete();
         $token = $user->createToken('flutter-app')->plainTextToken;
 
-        $pendaftaran = Pendaftaran::where('jamaah_id', $user->jamaah_id)
-            ->latest()
-            ->first();
+        // Untuk kolektor, tidak perlu data pendaftaran pribadi
+        $pendaftaran = null;
+        if ($user->role === 'user' && $user->jamaah_id) {
+            $pendaftaran = Pendaftaran::where('jamaah_id', $user->jamaah_id)
+                ->latest()->first();
+        }
 
         return response()->json([
             'success' => true,
@@ -46,13 +50,13 @@ class AuthApiController extends Controller
             'data'    => [
                 'token' => $token,
                 'user'  => [
-                    'id'               => $user->id,
-                    'name'             => $user->name,
-                    'email'            => $user->email,
-                    'role'             => $user->role,
-                    'jamaah_id'        => $user->jamaah_id,
-                    'saving_type'      => $pendaftaran?->jenis,
-                    'registered_date'  => $pendaftaran?->tanggal_daftar?->toDateString(),
+                    'id'              => $user->id,
+                    'name'            => $user->name,
+                    'email'           => $user->email,
+                    'role'            => $user->role,           // ← flutter baca ini
+                    'jamaah_id'       => $user->jamaah_id,
+                    'saving_type'     => $pendaftaran?->jenis,
+                    'registered_date' => $pendaftaran?->tanggal_daftar?->toDateString(),
                 ],
             ],
         ]);
@@ -62,30 +66,29 @@ class AuthApiController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Logout berhasil.',
-        ]);
+        return response()->json(['success' => true, 'message' => 'Logout berhasil.']);
     }
 
     public function profile(Request $request)
     {
         $user = $request->user();
 
-        $pendaftaran = Pendaftaran::where('jamaah_id', $user->jamaah_id)
-            ->latest()
-            ->first();
+        $pendaftaran = null;
+        if ($user->role === 'user' && $user->jamaah_id) {
+            $pendaftaran = Pendaftaran::where('jamaah_id', $user->jamaah_id)
+                ->latest()->first();
+        }
 
         return response()->json([
             'success' => true,
             'data'    => [
-                'id'               => $user->id,
-                'name'             => $user->name,
-                'email'            => $user->email,
-                'role'             => $user->role,
-                'jamaah_id'        => $user->jamaah_id,
-                'saving_type'      => $pendaftaran?->jenis,
-                'registered_date'  => $pendaftaran?->tanggal_daftar?->toDateString(),
+                'id'              => $user->id,
+                'name'            => $user->name,
+                'email'           => $user->email,
+                'role'            => $user->role,
+                'jamaah_id'       => $user->jamaah_id,
+                'saving_type'     => $pendaftaran?->jenis,
+                'registered_date' => $pendaftaran?->tanggal_daftar?->toDateString(),
             ],
         ]);
     }
