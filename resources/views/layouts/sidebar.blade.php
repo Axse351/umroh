@@ -21,26 +21,6 @@
             </li>
 
             {{-- ==================== DATA DASHBOARD ==================== --}}
-            <li class="menu-header">Data Dashboard</li>
-
-            <li class="dropdown {{ request()->is('admin/dashboard/transaksi*') ? 'active' : '' }}">
-                <a href="#" class="nav-link has-dropdown">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Total Transaksi</span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li>
-                        <a class="nav-link" href="{{ url('admin/dashboard/transaksi-umroh') }}">
-                            Total Transaksi Umroh
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="{{ url('admin/dashboard/transaksi-haji') }}">
-                            Total Transaksi Haji
-                        </a>
-                    </li>
-                </ul>
-            </li>
 
             {{-- ==================== MENU TRAVEL ==================== --}}
             <li class="menu-header">Menu Travel</li>
