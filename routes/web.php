@@ -44,7 +44,9 @@ use App\Http\Controllers\User\DashboardController as UserDashboard;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', fn() => redirect()->route('login'));
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
