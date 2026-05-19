@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 class WelcomeSettingController extends Controller
 {
     /* ================================================================
-     |  INDEX — Tampilkan halaman CMS dengan semua tab
+     |  INDEX — Tampilkan halaman CMS admin (bukan welcome publik!)
      * ================================================================ */
     public function index()
     {
@@ -21,6 +21,7 @@ class WelcomeSettingController extends Controller
         $umroh    = WelcomePackage::umroh()->orderBy('sort_order')->get();
         $haji     = WelcomePackage::haji()->orderBy('sort_order')->get();
 
+        // ✅ View admin CMS, BUKAN welcome.blade.php
         return view('admin.welcome-setting.index', compact('settings', 'slides', 'umroh', 'haji'));
     }
 
@@ -30,31 +31,31 @@ class WelcomeSettingController extends Controller
     public function updateGeneral(Request $request)
     {
         $request->validate([
-            'brand_name'      => 'required|string|max:100',
-            'brand_tagline'   => 'required|string|max:100',
-            'brand_since'     => 'required|string|max:10',
-            'about_title'     => 'required|string|max:200',
-            'about_text1'     => 'required|string',
-            'about_text2'     => 'required|string',
-            'about_badge_num' => 'required|string|max:20',
+            'brand_name'        => 'required|string|max:100',
+            'brand_tagline'     => 'required|string|max:100',
+            'brand_since'       => 'required|string|max:10',
+            'about_title'       => 'required|string|max:200',
+            'about_text1'       => 'required|string',
+            'about_text2'       => 'required|string',
+            'about_badge_num'   => 'required|string|max:20',
             'about_badge_label' => 'required|string|max:50',
-            'stat1_num' => 'required|string|max:20',
-            'stat1_label' => 'required|string|max:50',
-            'stat2_num' => 'required|string|max:20',
-            'stat2_label' => 'required|string|max:50',
-            'stat3_num' => 'required|string|max:20',
-            'stat3_label' => 'required|string|max:50',
-            'stat4_num' => 'required|string|max:20',
-            'stat4_label' => 'required|string|max:50',
-            'contact_phone'   => 'required|string|max:30',
-            'contact_wa'      => 'required|string|max:30',
-            'contact_wa_link' => 'required|string|max:30',
-            'contact_email'   => 'required|email|max:100',
-            'contact_address' => 'required|string|max:200',
-            'seo_title'       => 'required|string|max:200',
-            'seo_description' => 'required|string',
-            'brand_logo'      => 'nullable|image|max:2048',
-            'about_image'     => 'nullable|image|max:5120',
+            'stat1_num'         => 'required|string|max:20',
+            'stat1_label'       => 'required|string|max:50',
+            'stat2_num'         => 'required|string|max:20',
+            'stat2_label'       => 'required|string|max:50',
+            'stat3_num'         => 'required|string|max:20',
+            'stat3_label'       => 'required|string|max:50',
+            'stat4_num'         => 'required|string|max:20',
+            'stat4_label'       => 'required|string|max:50',
+            'contact_phone'     => 'required|string|max:30',
+            'contact_wa'        => 'required|string|max:30',
+            'contact_wa_link'   => 'required|string|max:30',
+            'contact_email'     => 'required|email|max:100',
+            'contact_address'   => 'required|string|max:200',
+            'seo_title'         => 'required|string|max:200',
+            'seo_description'   => 'required|string',
+            'brand_logo'        => 'nullable|image|max:2048',
+            'about_image'       => 'nullable|image|max:5120',
         ]);
 
         // Upload brand_logo
@@ -130,7 +131,6 @@ class WelcomeSettingController extends Controller
             $data['image'] = $request->file('image')->store('welcome/slides', 'public');
         }
 
-        // Proses stats menjadi array bersih
         $data['stats'] = collect($request->input('stats', []))
             ->filter(fn($s) => !empty($s['num']) && !empty($s['label']))
             ->values()
@@ -181,15 +181,21 @@ class WelcomeSettingController extends Controller
     {
         if ($slide->image) Storage::disk('public')->delete($slide->image);
         $slide->delete();
+
         return back()->with('success', 'Slide berhasil dihapus.');
     }
 
     public function reorderSlides(Request $request)
     {
-        $request->validate(['order' => 'required|array', 'order.*' => 'integer']);
+        $request->validate([
+            'order'   => 'required|array',
+            'order.*' => 'integer',
+        ]);
+
         foreach ($request->order as $sort => $id) {
             WelcomeSlide::where('id', $id)->update(['sort_order' => $sort + 1]);
         }
+
         return response()->json(['success' => true]);
     }
 
@@ -199,18 +205,18 @@ class WelcomeSettingController extends Controller
     public function storePackage(Request $request)
     {
         $data = $request->validate([
-            'jenis'      => 'required|in:umroh,haji',
-            'name'       => 'required|string|max:100',
-            'badge'      => 'nullable|string|max:100',
+            'jenis'       => 'required|in:umroh,haji',
+            'name'        => 'required|string|max:100',
+            'badge'       => 'nullable|string|max:100',
             'is_featured' => 'nullable|boolean',
-            'price'      => 'required|string|max:50',
-            'duration'   => 'required|string|max:50',
-            'hotel'      => 'required|string|max:100',
-            'features'   => 'required|array|min:1',
-            'features.*' => 'required|string|max:200',
+            'price'       => 'required|string|max:50',
+            'duration'    => 'required|string|max:50',
+            'hotel'       => 'required|string|max:100',
+            'features'    => 'required|array|min:1',
+            'features.*'  => 'required|string|max:200',
         ]);
 
-        $data['features']    = array_filter($data['features']);
+        $data['features']    = array_values(array_filter($data['features']));
         $data['is_featured'] = $request->boolean('is_featured');
         $data['sort_order']  = WelcomePackage::where('jenis', $data['jenis'])->max('sort_order') + 1;
 
@@ -222,16 +228,16 @@ class WelcomeSettingController extends Controller
     public function updatePackage(Request $request, WelcomePackage $package)
     {
         $data = $request->validate([
-            'jenis'      => 'required|in:umroh,haji',
-            'name'       => 'required|string|max:100',
-            'badge'      => 'nullable|string|max:100',
+            'jenis'       => 'required|in:umroh,haji',
+            'name'        => 'required|string|max:100',
+            'badge'       => 'nullable|string|max:100',
             'is_featured' => 'nullable|boolean',
-            'price'      => 'required|string|max:50',
-            'duration'   => 'required|string|max:50',
-            'hotel'      => 'required|string|max:100',
-            'features'   => 'required|array|min:1',
-            'features.*' => 'required|string|max:200',
-            'is_active'  => 'nullable|boolean',
+            'price'       => 'required|string|max:50',
+            'duration'    => 'required|string|max:50',
+            'hotel'       => 'required|string|max:100',
+            'features'    => 'required|array|min:1',
+            'features.*'  => 'required|string|max:200',
+            'is_active'   => 'nullable|boolean',
         ]);
 
         $data['features']    = array_values(array_filter($data['features']));
@@ -246,21 +252,23 @@ class WelcomeSettingController extends Controller
     public function destroyPackage(WelcomePackage $package)
     {
         $package->delete();
+
         return back()->with('success', 'Paket berhasil dihapus.');
     }
 
     /* ================================================================
-     |  HAPUS GAMBAR (brand_logo / about_image / slide image)
+     |  HAPUS GAMBAR (brand_logo / about_image)
      * ================================================================ */
     public function deleteImage(Request $request)
     {
-        $key = $request->input('key');
+        $key         = $request->input('key');
         $allowedKeys = ['brand_logo', 'about_image'];
 
         if (in_array($key, $allowedKeys)) {
             $path = WelcomeSetting::get($key);
             if ($path) Storage::disk('public')->delete($path);
             WelcomeSetting::set($key, null);
+
             return back()->with('success', 'Gambar berhasil dihapus.');
         }
 

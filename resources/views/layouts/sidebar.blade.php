@@ -209,6 +209,12 @@
                     <span>Setting</span>
                 </a>
             </li>
+            <li class="{{ request()->is('admin/welcome-setting*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.welcome-setting.index') }}">
+                    <i class="fas fa-home"></i>
+                    <span>Welcome Setting</span>
+                </a>
+            </li>
 
         </ul>
     </aside>
