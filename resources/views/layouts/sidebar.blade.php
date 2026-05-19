@@ -209,6 +209,12 @@
                     <span>Setting</span>
                 </a>
             </li>
+            <li class="{{ request()->is('admin/user*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.user.index') }}">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Data User</span>
+                </a>
+            </li>
             <li class="{{ request()->is('admin/welcome-setting*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.welcome-setting.index') }}">
                     <i class="fas fa-home"></i>

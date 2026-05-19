@@ -30,6 +30,7 @@ use App\Http\Controllers\{
     MutasiController,
     PemasukanController,
     GunakanTabunganController,
+    UserController,
     WelcomeController
 };
 
@@ -196,6 +197,9 @@ Route::middleware(['auth', 'role:admin'])
         // Hapus gambar (brand_logo / about_image)
         Route::delete('welcome-setting/delete-image', [WelcomeSettingController::class, 'deleteImage'])
             ->name('welcome-setting.delete-image');
+        Route::resource('user', UserController::class);
+        Route::post('user/{user}/reset-password', [UserController::class, 'resetPassword'])
+            ->name('user.reset-password');
     });
 
 
