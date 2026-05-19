@@ -19,16 +19,6 @@
                 </div>
                 <div class="card-body">
 
-                    {{-- Alert --}}
-                    @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
-                            <button type="button" class="close" data-dismiss="alert">
-                                <span>&times;</span>
-                            </button>
-                        </div>
-                    @endif
-
                     {{-- Filter Status --}}
                     <div class="mb-3">
                         <span class="text-muted small mr-2">Filter:</span>

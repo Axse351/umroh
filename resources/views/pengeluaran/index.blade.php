@@ -35,10 +35,6 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show">{{ session('success') }}<button
-                                type="button" class="close" data-dismiss="alert">&times;</button></div>
-                    @endif
                     <div class="alert alert-danger">
                         <strong>Total Pengeluaran: Rp {{ number_format($total, 0, ',', '.') }}</strong>
                     </div>
