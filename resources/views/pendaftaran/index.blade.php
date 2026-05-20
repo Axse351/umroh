@@ -38,11 +38,11 @@
                         </form>
                         {{-- Tambah --}}
                         <a href="{{ route('admin.pendaftaran.create', ['jenis' => 'umroh']) }}"
-                            class="btn btn-primary btn-sm">
+                            class="btn btn-primary btn-sm ml-2">
                             <i class="fas fa-plus mr-1"></i> Umroh
                         </a>
                         <a href="{{ route('admin.pendaftaran.create', ['jenis' => 'haji']) }}"
-                            class="btn btn-success btn-sm">
+                            class="btn btn-success btn-sm ml-2">
                             <i class="fas fa-plus mr-1"></i> Haji
                         </a>
                     </div>

@@ -214,22 +214,15 @@
         }
 
         .nav-logo-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            overflow: hidden;
-        }
+    display: flex;
+    align-items: center;
+}
 
         .nav-logo-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    height: 55px; /* sesuaikan ukuran */
+    width: auto;
+    object-fit: contain;
+}
 
         .nav-logo-name {
             font-family: "Cormorant Garamond", serif;
@@ -1647,19 +1640,15 @@
 
     {{-- ===== NAVBAR ===== --}}
     <nav id="navbar">
-        <div class="nav-logo">
-            <div class="nav-logo-icon">
-                @if (!empty($s['brand_logo']))
-                    <img src="{{ Storage::url($s['brand_logo']) }}" alt="{{ $s['brand_name'] ?? 'Logo' }}">
-                @else
-                    ☪
-                @endif
-            </div>
-            <div>
-                <div class="nav-logo-name">{{ $s['brand_name'] ?? 'GENMIM' }}</div>
-                <div class="nav-logo-sub">{{ $s['brand_tagline'] ?? 'Travel & Tour' }}</div>
-            </div>
-        </div>
+       <div class="nav-logo">
+    <div class="nav-logo-icon">
+        @if (!empty($s['brand_logo']))
+            <img src="{{ Storage::url($s['brand_logo']) }}" alt="{{ $s['brand_name'] ?? 'Logo' }}">
+        @else
+            <img src="{{ asset('assets/img/logo.png') }}" alt="{{ $s['brand_name'] ?? 'Logo' }}">
+        @endif
+    </div>
+</div>
         <ul class="nav-links">
             <li><a href="#hero">Beranda</a></li>
             <li><a href="#about">Tentang Kami</a></li>
