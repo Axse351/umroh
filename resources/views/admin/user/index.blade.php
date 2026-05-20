@@ -11,24 +11,6 @@
 @section('content')
     <section class="section">
         <div class="section-body">
-
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible show fade">
-                    <div class="alert-body">
-                        <button class="close" data-dismiss="alert"><span>&times;</span></button>
-                        <i class="fas fa-check-circle mr-1"></i> {!! session('success') !!}
-                    </div>
-                </div>
-            @endif
-            @if (session('error'))
-                <div class="alert alert-danger alert-dismissible show fade">
-                    <div class="alert-body">
-                        <button class="close" data-dismiss="alert"><span>&times;</span></button>
-                        <i class="fas fa-exclamation-circle mr-1"></i> {!! session('error') !!}
-                    </div>
-                </div>
-            @endif
-
             {{-- STAT CARDS --}}
             <div class="row mb-3">
                 <div class="col-6 col-md-3">
@@ -186,8 +168,8 @@
                                                 title="Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('admin.user.edit', $user) }}"
-                                                class="btn btn-sm btn-warning" title="Edit">
+                                            <a href="{{ route('admin.user.edit', $user) }}" class="btn btn-sm btn-warning"
+                                                title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             @if ($user->id !== auth()->id())

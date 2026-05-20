@@ -104,7 +104,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('pengeluaran-produk', PengeluaranProdukController::class);
         Route::resource('stok-opname', StokOpnameController::class);
         Route::resource('akses-system', AksesSystemController::class);
-
+        Route::prefix('setoran')->name('setoran.')->group(function () {
+            Route::patch('{setoran}/konfirmasi', [SetoranController::class, 'konfirmasi'])->name('konfirmasi');
+            Route::patch('{setoran}/tolak',      [SetoranController::class, 'tolak'])->name('tolak');
+        });
         /*
         |--------------------------------------------------------------------------
         | EXTRA ROUTES

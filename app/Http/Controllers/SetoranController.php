@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Karyawan;
 use App\Models\Setoran;
 use App\Models\Tabungan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class SetoranController extends Controller
@@ -20,68 +22,135 @@ class SetoranController extends Controller
 
     public function create(Request $request)
     {
-        $tabungans  = Tabungan::with('jamaah')->where('status', 'aktif')->get();
-        $tabungan_id = $request->tabungan_id;
-        return view('setoran.create', compact('tabungans', 'tabungan_id'));
+        $tabungans  = Tabungan::with('jamaah')
+            ->where('status', 'aktif')
+            ->get();
+
+        // Karyawan yang punya role kolektor
+        $kolektors = Karyawan::where('jabatan', 'kolektor')
+            ->where('status', 'aktif')
+            ->orderBy('nama_lengkap')
+            ->get();
+
+        $tabunganId = $request->tabungan_id;
+
+        return view('setoran.create', compact('tabungans', 'kolektors', 'tabunganId'));
     }
 
+    /**
+     * Simpan setoran baru & update saldo tabungan.
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'tabungan_id'   => 'required|exists:tabungans,id',
-            'jumlah_setor'  => 'required|numeric|min:1',
+            'tabungan_id'  => 'required|exists:tabungans,id',
+            'karyawan_id'  => 'nullable|exists:karyawans,id',
+            'jumlah_setor' => 'required|numeric|min:1',
             'tanggal_setor' => 'required|date',
-            'jenis'         => 'required|in:setor,tarik',
-            'metode'        => 'required|in:tunai,transfer,debit,qris',
-            'bukti_setor'   => 'nullable|image|max:2048',
-            'catatan'       => 'nullable|string',
+            'jenis'        => 'required|in:setor,tarik',
+            'metode'       => 'required|in:tunai,transfer,debit,kredit,qris',
+            'status'       => 'required|in:pending,diterima,ditolak',
+            'bukti_setor'  => 'nullable|image|max:2048',
+            'catatan'      => 'nullable|string',
         ]);
 
-        $data = $request->except('bukti_setor');
-        $data['no_setoran']  = 'SET-' . strtoupper(uniqid());
-        $data['karyawan_id'] = auth()->user()->karyawan->id ?? null;
-        $data['status']      = 'diterima';
+        DB::transaction(function () use ($request) {
+            $data                = $request->except('bukti_setor');
+            $data['no_setoran']  = 'SET-' . strtoupper(uniqid());
 
-        if ($request->hasFile('bukti_setor')) {
-            $data['bukti_setor'] = $request->file('bukti_setor')->store('setoran', 'public');
-        }
+            if ($request->hasFile('bukti_setor')) {
+                $data['bukti_setor'] = $request->file('bukti_setor')
+                    ->store('setoran', 'public');
+            }
 
-        $setoran  = Setoran::create($data);
-        $tabungan = $setoran->tabungan;
+            $setoran = Setoran::create($data);
 
-        // Update saldo tabungan
-        if ($data['jenis'] === 'setor') {
-            $tabungan->increment('saldo', $data['jumlah_setor']);
-        } else {
-            $tabungan->decrement('saldo', $data['jumlah_setor']);
-        }
+            // Hanya ubah saldo jika langsung diterima
+            if ($setoran->status === 'diterima') {
+                $this->syncSaldo($setoran->tabungan_id);
+            }
+        });
 
-        // Tandai selesai jika target terpenuhi
-        if ($tabungan->fresh()->saldo >= $tabungan->target_tabungan) {
-            $tabungan->update(['status' => 'selesai']);
-        }
-
-        return redirect()->route('admin.setoran.index')->with('success', 'Data setoran berhasil ditambahkan.');
+        return redirect()
+            ->route('admin.tabungan.show', $request->tabungan_id)
+            ->with('success', 'Setoran berhasil dicatat.');
     }
 
-    public function show(Setoran $setoran)
+    /**
+     * Konfirmasi setoran pending → ubah ke diterima & update saldo.
+     */
+    public function konfirmasi(Setoran $setoran)
     {
-        $setoran->load('tabungan.jamaah', 'karyawan');
-        return view('setoran.show', compact('setoran'));
+        DB::transaction(function () use ($setoran) {
+            $setoran->update(['status' => 'diterima']);
+            $this->syncSaldo($setoran->tabungan_id);
+        });
+
+        return back()->with('success', 'Setoran dikonfirmasi.');
     }
 
+    /**
+     * Tolak setoran pending → ubah ke ditolak (saldo tidak berubah).
+     */
+    public function tolak(Setoran $setoran)
+    {
+        $setoran->update(['status' => 'ditolak']);
+
+        return back()->with('success', 'Setoran ditolak.');
+    }
+
+    /**
+     * Hapus setoran & sesuaikan saldo.
+     */
     public function destroy(Setoran $setoran)
     {
-        // Rollback saldo
-        $tabungan = $setoran->tabungan;
-        if ($setoran->jenis === 'setor') {
-            $tabungan->decrement('saldo', $setoran->jumlah_setor);
-        } else {
-            $tabungan->increment('saldo', $setoran->jumlah_setor);
+        $tabunganId = $setoran->tabungan_id;
+        $wasDiterima = $setoran->status === 'diterima';
+
+        DB::transaction(function () use ($setoran, $tabunganId, $wasDiterima) {
+            $setoran->delete();
+
+            if ($wasDiterima) {
+                $this->syncSaldo($tabunganId);
+            }
+        });
+
+        return back()->with('success', 'Setoran berhasil dihapus.');
+    }
+ 
+    // ── Private Helper ────────────────────────────────────────────────────────
+
+    /**
+     * Hitung ulang saldo dari semua setoran diterima.
+     * Lebih aman daripada increment/decrement manual.
+     */
+    private function syncSaldo(int $tabunganId): void
+    {
+        $tabungan = Tabungan::findOrFail($tabunganId);
+
+        $totalMasuk = Setoran::where('tabungan_id', $tabunganId)
+            ->where('status', 'diterima')
+            ->where('jenis', 'setor')
+            ->sum('jumlah_setor');
+
+        $totalKeluar = Setoran::where('tabungan_id', $tabunganId)
+            ->where('status', 'diterima')
+            ->where('jenis', 'tarik')
+            ->sum('jumlah_setor');
+
+        $saldoBaru = max(0, $totalMasuk - $totalKeluar);
+
+        // Otomatis tandai selesai bila target terpenuhi
+        $statusBaru = $tabungan->status;
+        if ($saldoBaru >= $tabungan->target_tabungan && $tabungan->status === 'aktif') {
+            $statusBaru = 'selesai';
+        } elseif ($saldoBaru < $tabungan->target_tabungan && $tabungan->status === 'selesai') {
+            $statusBaru = 'aktif'; // rollback jika setoran dihapus
         }
 
-        if ($setoran->bukti_setor) Storage::disk('public')->delete($setoran->bukti_setor);
-        $setoran->delete();
-        return redirect()->route('admin.setoran.index')->with('success', 'Data setoran berhasil dihapus.');
+        $tabungan->update([
+            'saldo'  => $saldoBaru,
+            'status' => $statusBaru,
+        ]);
     }
 }

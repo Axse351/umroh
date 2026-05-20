@@ -64,6 +64,10 @@ Route::prefix('v1')->group(function () {
             // Pembayaran
             Route::get('/pembayaran',          [KolektorApiController::class, 'pembayaranIndex']);
             Route::post('/pembayaran',         [KolektorApiController::class, 'pembayaranStore']);
+            Route::get('/tabungan',                      [KolektorApiController::class, 'tabunganIndex']);
+            Route::post('/tabungan',                     [KolektorApiController::class, 'tabunganStore']);  // ← TAMBAH INI
+            Route::get('/tabungan/setoran-saya',         [KolektorApiController::class, 'setoranSaya']);
+            Route::get('/tabungan/{tabungan}',           [KolektorApiController::class, 'tabunganShow']);
+            Route::post('/tabungan/{tabungan}/setor',    [KolektorApiController::class, 'tabunganSetor']);
         });
-
 });
