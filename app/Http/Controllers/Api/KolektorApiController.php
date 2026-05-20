@@ -441,7 +441,7 @@ class KolektorApiController extends Controller
             ->latest()
             ->paginate(20);
 
-        $data = $setorans->getCollection()->map(fn($s) => [
+        $data = collect($setorans->items())->map(fn($s) => [
             ...$this->formatSetoran($s),
             'nama_jamaah'       => $s->tabungan?->jamaah?->nama_lengkap,
             'no_rekening'       => $s->tabungan?->no_rekening_tabungan,

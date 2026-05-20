@@ -20,6 +20,7 @@ class SetoranController extends Controller
         return view('setoran.index', compact('setorans', 'jenis'));
     }
 
+
     public function create(Request $request)
     {
         $tabungans  = Tabungan::with('jamaah')
