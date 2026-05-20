@@ -119,6 +119,8 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('pendaftaran/{pendaftaran}/status',   [PendaftaranController::class, 'updateStatus'])->name('pendaftaran.updateStatus');
         Route::patch('pendaftaran/{pendaftaran}/status',  [PendaftaranController::class, 'updateStatus'])->name('pendaftaran.update-status');
         Route::post('dokumen/{dokumen}/validasi',         [DokumenController::class, 'validasi'])->name('dokumen.validasi');
+        Route::patch('setoran/{setoran}/konfirmasi', [SetoranController::class, 'konfirmasi'])->name('setoran.konfirmasi');
+        Route::patch('setoran/{setoran}/tolak', [SetoranController::class, 'tolak'])->name('setoran.tolak');
 
         /*
         |--------------------------------------------------------------------------
