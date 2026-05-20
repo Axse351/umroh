@@ -21,8 +21,9 @@
                             </select>
                             <button class="btn btn-sm btn-secondary"><i class="fas fa-search"></i></button>
                         </form>
-                        <a href="{{ route('admin.supplier.create') }}" class="btn btn-primary btn-sm"><i
-                                class="fas fa-plus mr-1"></i> Tambah</a>
+                        <a href="{{ route('admin.supplier.create') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus mr-1"></i> Tambah
+                        </a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -51,23 +52,25 @@
                                         <td>{{ $s->nama_pic ?? '-' }}</td>
                                         <td>{{ $s->no_telepon }}</td>
                                         <td>{{ $s->nama_bank ?? '-' }}</td>
-                                        <td><span
-                                                class="badge badge-{{ $s->status == 'aktif' ? 'success' : 'danger' }}">{{ ucfirst($s->status) }}</span>
+                                        <td>
+                                            <span class="badge badge-{{ $s->status == 'aktif' ? 'success' : 'danger' }}">
+                                                {{ ucfirst($s->status) }}
+                                            </span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('admin.supplier.show', $s) }}" class="btn btn-info btn-sm"><i
-                                                    class="fas fa-eye"></i></a>
-                                            <a href="{{ route('admin.supplier.edit', $s) }}"
-                                                class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+                                            <a href="{{ route('admin.supplier.show', $s) }}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('admin.supplier.edit', $s) }}" class="btn btn-warning btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
                                             <form action="{{ route('admin.supplier.destroy', $s) }}" method="POST"
                                                 class="d-inline" onsubmit="return confirm('Yakin hapus?')">
                                                 @csrf @method('DELETE')
-                                                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                                <button class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </form>
-                                            <a href="{{ route('admin.tabungan.cetak-mutasi', $tabungan) }}" target="_blank"
-                                                class="btn btn-primary btn-sm">
-                                                <i class="fas fa-print mr-1"></i> Cetak Mutasi
-                                            </a>
                                         </td>
                                     </tr>
                                 @empty
@@ -78,7 +81,8 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="d-flex justify-content-end mt-3">{{ $suppliers->appends(request()->query())->links() }}
+                    <div class="d-flex justify-content-end mt-3">
+                        {{ $suppliers->appends(request()->query())->links() }}
                     </div>
                 </div>
             </div>

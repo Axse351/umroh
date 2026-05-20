@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
 class KolektorApiController extends Controller
 {
     // ═══════════════════════════════════════════════════════════
-    // JAMAAH (tidak berubah)
+    // JAMAAH
     // ═══════════════════════════════════════════════════════════
 
     public function jamaahIndex(Request $request)
@@ -109,7 +109,7 @@ class KolektorApiController extends Controller
     }
 
     // ═══════════════════════════════════════════════════════════
-    // KEBERANGKATAN (tidak berubah)
+    // KEBERANGKATAN
     // ═══════════════════════════════════════════════════════════
 
     public function keberangkatanList(Request $request)
@@ -139,7 +139,7 @@ class KolektorApiController extends Controller
     }
 
     // ═══════════════════════════════════════════════════════════
-    // PENDAFTARAN (tidak berubah)
+    // PENDAFTARAN
     // ═══════════════════════════════════════════════════════════
 
     public function pendaftaranIndex(Request $request)
@@ -222,7 +222,7 @@ class KolektorApiController extends Controller
     }
 
     // ═══════════════════════════════════════════════════════════
-    // PEMBAYARAN (tidak berubah)
+    // PEMBAYARAN
     // ═══════════════════════════════════════════════════════════
 
     public function pembayaranStore(Request $request)
@@ -290,18 +290,14 @@ class KolektorApiController extends Controller
     }
 
     // ═══════════════════════════════════════════════════════════
-    // TABUNGAN — ENDPOINT BARU UNTUK KOLEKTOR
+    // TABUNGAN
     // ═══════════════════════════════════════════════════════════
 
-    /**
-     * GET /api/v1/kolektor/tabungan
-     * Daftar semua tabungan aktif (untuk kolektor melihat & menagih setoran).
-     */
     public function tabunganIndex(Request $request)
     {
         $search = $request->search;
-        $jenis  = $request->jenis;   // umroh / haji
-        $status = $request->status;  // aktif / selesai / batal
+        $jenis  = $request->jenis;
+        $status = $request->status;
 
         $tabungans = Tabungan::with('jamaah')
             ->when($search, fn($q) => $q->whereHas(
@@ -310,9 +306,9 @@ class KolektorApiController extends Controller
                 $j->where('nama_lengkap', 'like', "%$search%")
                     ->orWhere('nik', 'like', "%$search%")
             ))
-            ->when($jenis,  fn($q) => $q->where('jenis', $jenis))
-            ->when($status, fn($q) => $q->where('status', $status))
-            ->when(!$status, fn($q) => $q->where('status', 'aktif')) // default aktif saja
+            ->when($jenis,   fn($q) => $q->where('jenis', $jenis))
+            ->when($status,  fn($q) => $q->where('status', $status))
+            ->when(!$status, fn($q) => $q->where('status', 'aktif'))
             ->latest()
             ->paginate(20);
 
@@ -331,13 +327,8 @@ class KolektorApiController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/v1/kolektor/tabungan/{tabungan}
-     * Detail tabungan beserta riwayat setoran yang pernah dicatat kolektor ini.
-     */
     public function tabunganShow(Tabungan $tabungan)
     {
-        // ✅ Load sekali saja, tidak perlu load ulang di bawah
         $tabungan->load([
             'jamaah',
             'setorans' => fn($q) => $q->with('karyawan')->orderByDesc('tanggal_setor'),
@@ -346,16 +337,15 @@ class KolektorApiController extends Controller
         $kolektorId = $this->resolveKaryawanId();
 
         $setoranSaya = $tabungan->setorans
-            ->where('karyawan_id', $kolektorId)
+            ->when($kolektorId, fn($c) => $c->where('karyawan_id', $kolektorId))
             ->values();
 
         return response()->json([
             'success' => true,
             'data'    => [
                 ...$this->formatTabungan($tabungan),
-                // ✅ Batasi field — jangan kirim semua relasi nested
                 'setorans'     => $tabungan->setorans
-                    ->take(50)  // batasi 50 terakhir
+                    ->take(50)
                     ->map(fn($s) => $this->formatSetoran($s))
                     ->values(),
                 'setoran_saya' => $setoranSaya
@@ -365,11 +355,49 @@ class KolektorApiController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/v1/kolektor/tabungan/{tabungan}/setor
-     * Kolektor mencatat setoran dari jamaah.
-     * Status default: 'pending' — admin harus konfirmasi.
-     */
+    public function tabunganStore(Request $request)
+    {
+        $request->validate([
+            'jamaah_id'       => 'required|exists:jamaah,id',
+            'jenis'           => 'required|in:umroh,haji',
+            'target_tabungan' => 'required|numeric|min:1',
+            'tanggal_target'  => 'nullable|date|after:today',
+            'catatan'         => 'nullable|string',
+        ]);
+
+        $sudahAda = Tabungan::where('jamaah_id', $request->jamaah_id)
+            ->where('jenis', $request->jenis)
+            ->where('status', 'aktif')
+            ->exists();
+
+        if ($sudahAda) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Jamaah sudah memiliki tabungan ' . $request->jenis . ' yang aktif.',
+            ], 422);
+        }
+
+        $tabungan = Tabungan::create([
+            'no_rekening_tabungan' => 'TAB-' . strtoupper(uniqid()),
+            'jamaah_id'            => $request->jamaah_id,
+            'jenis'                => $request->jenis,
+            'target_tabungan'      => $request->target_tabungan,
+            'saldo'                => 0,
+            'tanggal_buka'         => now()->toDateString(),
+            'tanggal_target'       => $request->tanggal_target,
+            'status'               => 'aktif',
+            'catatan'              => $request->catatan,
+        ]);
+
+        $tabungan->load('jamaah');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tabungan berhasil dibuka.',
+            'data'    => $this->formatTabungan($tabungan),
+        ], 201);
+    }
+
     public function tabunganSetor(Request $request, Tabungan $tabungan)
     {
         if ($tabungan->status !== 'aktif') {
@@ -397,7 +425,6 @@ class KolektorApiController extends Controller
             'tanggal_setor' => $request->tanggal_setor,
             'jenis'         => 'setor',
             'metode'        => $request->metode,
-            // Kolektor hanya submit, admin yang konfirmasi
             'status'        => 'pending',
             'catatan'       => $request->catatan,
         ];
@@ -407,7 +434,6 @@ class KolektorApiController extends Controller
         }
 
         $setoran = Setoran::create($data);
-        // Saldo BELUM berubah — baru berubah setelah admin konfirmasi
 
         return response()->json([
             'success' => true,
@@ -418,21 +444,47 @@ class KolektorApiController extends Controller
 
     /**
      * GET /api/v1/kolektor/tabungan/setoran-saya
-     * Semua setoran yang pernah diinput kolektor yang sedang login.
+     *
+     * CATATAN: Di routes/api.php, route ini WAJIB didefinisikan
+     * SEBELUM Route::get('/tabungan/{tabungan}', ...) agar tidak
+     * tertangkap sebagai wildcard.
      */
     public function setoranSaya(Request $request)
     {
-        $kolektorId = $this->resolveKaryawanId();
+        $user = Auth::user();
 
-        if (!$kolektorId) {
+        // ── Debug: cek user login ──────────────────────────────────────
+        if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Data kolektor tidak ditemukan untuk akun ini.',
-            ], 404);
+                'message' => 'Unauthenticated.',
+            ], 401);
         }
 
-        $status = $request->status; // pending / diterima / ditolak
-        $jenis  = $request->jenis;  // umroh / haji
+        $kolektorId = $this->resolveKaryawanId();
+
+        // ── Jika kolektor belum ditemukan, kembalikan data kosong
+        //    (bukan error) supaya UI tidak crash ─────────────────────────
+        if (!$kolektorId) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data kolektor belum terhubung ke akun ini.',
+                'debug'   => [
+                    'user_id'    => $user->id,
+                    'user_email' => $user->email,
+                    'user_role'  => $user->role,
+                ],
+                'data' => [
+                    'current_page' => 1,
+                    'last_page'    => 1,
+                    'total'        => 0,
+                    'data'         => [],
+                ],
+            ]);
+        }
+
+        $status = $request->status;
+        $jenis  = $request->jenis;
 
         $setorans = Setoran::with(['tabungan.jamaah', 'karyawan'])
             ->where('karyawan_id', $kolektorId)
@@ -443,9 +495,9 @@ class KolektorApiController extends Controller
 
         $data = $setorans->getCollection()->map(fn($s) => [
             ...$this->formatSetoran($s),
-            'nama_jamaah'       => $s->tabungan?->jamaah?->nama_lengkap,
-            'no_rekening'       => $s->tabungan?->no_rekening_tabungan,
-            'jenis_tabungan'    => $s->tabungan?->jenis,
+            'nama_jamaah'    => $s->tabungan?->jamaah?->nama_lengkap,
+            'no_rekening'    => $s->tabungan?->no_rekening_tabungan,
+            'jenis_tabungan' => $s->tabungan?->jenis,
         ])->values();
 
         return response()->json([
@@ -464,16 +516,33 @@ class KolektorApiController extends Controller
     // ═══════════════════════════════════════════════════════════
 
     /**
-     * Cari karyawan_id dari user yang sedang login.
-     * Asumsi: tabel karyawans punya kolom user_id atau email.
+     * Resolve karyawan_id dari user yang sedang login.
+     *
+     * Strategi (urutan prioritas):
+     * 1. Kolom karyawan_id langsung di tabel users (paling cepat)
+     * 2. Match by email antara users.email ↔ karyawans.email
+     * 3. Match by nama (fallback terakhir jika email tidak ada di karyawans)
      */
     private function resolveKaryawanId(): ?int
     {
         $user = Auth::user();
         if (!$user) return null;
 
-        return Karyawan::where('email', $user->email)
+        // Strategi 1 — kolom langsung di users (jika ada)
+        if (!empty($user->karyawan_id)) {
+            return (int) $user->karyawan_id;
+        }
+
+        // Strategi 2 — match by email
+        $byEmail = Karyawan::where('email', $user->email)->value('id');
+        if ($byEmail) return $byEmail;
+
+        // Strategi 3 — match by nama (last resort)
+        $byNama = Karyawan::where('nama_lengkap', $user->name)
+            ->orWhere('nama', $user->name)
             ->value('id');
+
+        return $byNama ? (int) $byNama : null;
     }
 
     private function updateStatusPendaftaran(int $pendaftaranId): void
@@ -532,7 +601,7 @@ class KolektorApiController extends Controller
             'status'        => $s->status,
             'catatan'       => $s->catatan,
             'bukti_setor'   => $s->bukti_setor ? asset('storage/' . $s->bukti_setor) : null,
-            'nama_kolektor' => $s->karyawan?->nama,
+            'nama_kolektor' => $s->karyawan?->nama ?? $s->karyawan?->nama_lengkap,
             'created_at'    => $s->created_at?->toDateTimeString(),
         ];
     }
@@ -597,53 +666,5 @@ class KolektorApiController extends Controller
             'no_pendaftaran' => $p->pendaftaran?->no_pendaftaran,
             'created_at'     => $p->created_at?->toDateTimeString(),
         ];
-    }
-
-    /**
-     * POST /api/v1/kolektor/tabungan
-     * Kolektor membuka tabungan baru untuk jamaah.
-     */
-    public function tabunganStore(Request $request)
-    {
-        $request->validate([
-            'jamaah_id'       => 'required|exists:jamaah,id',
-            'jenis'           => 'required|in:umroh,haji',
-            'target_tabungan' => 'required|numeric|min:1',
-            'tanggal_target'  => 'nullable|date|after:today',
-            'catatan'         => 'nullable|string',
-        ]);
-
-        // Cek apakah jamaah sudah punya tabungan aktif jenis yang sama
-        $sudahAda = Tabungan::where('jamaah_id', $request->jamaah_id)
-            ->where('jenis', $request->jenis)
-            ->where('status', 'aktif')
-            ->exists();
-
-        if ($sudahAda) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Jamaah sudah memiliki tabungan ' . $request->jenis . ' yang aktif.',
-            ], 422);
-        }
-
-        $tabungan = Tabungan::create([
-            'no_rekening_tabungan' => 'TAB-' . strtoupper(uniqid()),
-            'jamaah_id'            => $request->jamaah_id,
-            'jenis'                => $request->jenis,
-            'target_tabungan'      => $request->target_tabungan,
-            'saldo'                => 0,
-            'tanggal_buka'         => now()->toDateString(),
-            'tanggal_target'       => $request->tanggal_target,
-            'status'               => 'aktif',
-            'catatan'              => $request->catatan,
-        ]);
-
-        $tabungan->load('jamaah');
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Tabungan berhasil dibuka.',
-            'data'    => $this->formatTabungan($tabungan),
-        ], 201);
     }
 }

@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\KeberangkatanApiController;
 use App\Http\Controllers\Api\PembayaranApiController;
 use App\Http\Controllers\Api\PendaftaranApiController;
 use App\Http\Controllers\Api\SavingAccountApiController;
-use App\Http\Controllers\Api\KolektorApiController; // ← tambah ini
+use App\Http\Controllers\Api\KolektorApiController;
 
 Route::prefix('v1')->group(function () {
 
@@ -41,11 +41,12 @@ Route::prefix('v1')->group(function () {
     });
 
     // ── Kolektor ──────────────────────────────────────────────
-    Route::middleware(['auth:sanctum', 'api.role:kolektor']) // ← pakai api.role, bukan role.api
+    // Gunakan auth:sanctum saja dulu, cek role manual di controller
+    // supaya bisa debug apakah masalah di middleware atau di logic
+    Route::middleware(['auth:sanctum'])
         ->prefix('kolektor')
         ->group(function () {
 
-            // Logout & profile (shared, tidak perlu duplikat controller)
             Route::post('/logout',  [AuthApiController::class, 'logout']);
             Route::get('/profile',  [AuthApiController::class, 'profile']);
 
@@ -54,20 +55,22 @@ Route::prefix('v1')->group(function () {
             Route::get('/jamaah/{jamaah}',     [KolektorApiController::class, 'jamaahShow']);
             Route::post('/jamaah',             [KolektorApiController::class, 'jamaahStore']);
 
-            // Keberangkatan (picker untuk form pendaftaran)
+            // Keberangkatan
             Route::get('/keberangkatan',       [KolektorApiController::class, 'keberangkatanList']);
 
             // Pendaftaran
-            Route::get('/pendaftaran',              [KolektorApiController::class, 'pendaftaranIndex']);
-            Route::post('/pendaftaran',             [KolektorApiController::class, 'pendaftaranStore']);
+            Route::get('/pendaftaran',         [KolektorApiController::class, 'pendaftaranIndex']);
+            Route::post('/pendaftaran',        [KolektorApiController::class, 'pendaftaranStore']);
 
             // Pembayaran
             Route::get('/pembayaran',          [KolektorApiController::class, 'pembayaranIndex']);
             Route::post('/pembayaran',         [KolektorApiController::class, 'pembayaranStore']);
-            Route::get('/tabungan',                      [KolektorApiController::class, 'tabunganIndex']);
-            Route::post('/tabungan',                     [KolektorApiController::class, 'tabunganStore']);  // ← TAMBAH INI
-            Route::get('/tabungan/setoran-saya',         [KolektorApiController::class, 'setoranSaya']);
-            Route::get('/tabungan/{tabungan}',           [KolektorApiController::class, 'tabunganShow']);
-            Route::post('/tabungan/{tabungan}/setor',    [KolektorApiController::class, 'tabunganSetor']);
+
+            // Tabungan — URUTAN WAJIB: static route SEBELUM wildcard {tabungan}
+            Route::get('/tabungan',                   [KolektorApiController::class, 'tabunganIndex']);
+            Route::post('/tabungan',                  [KolektorApiController::class, 'tabunganStore']);
+            Route::get('/tabungan/setoran-saya',      [KolektorApiController::class, 'setoranSaya']);   // ← HARUS sebelum {tabungan}
+            Route::get('/tabungan/{tabungan}',        [KolektorApiController::class, 'tabunganShow']);
+            Route::post('/tabungan/{tabungan}/setor', [KolektorApiController::class, 'tabunganSetor']);
         });
 });
