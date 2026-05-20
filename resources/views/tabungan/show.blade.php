@@ -234,7 +234,7 @@
                                             <td>
                                                 @if ($s->karyawan)
                                                     <span class="badge badge-info">
-                                                        <i class="fas fa-user mr-1"></i>{{ $s->karyawan->nama }}
+                                                        <i class="fas fa-user mr-1"></i>{{ $s->karyawan->nama_lengkap }}
                                                     </span>
                                                 @else
                                                     <span class="text-muted">—</span>
